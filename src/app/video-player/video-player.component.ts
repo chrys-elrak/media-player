@@ -10,7 +10,6 @@ declare var remote: any;
   styleUrls: ['./video-player.component.css']
 })
 export class VideoPlayerComponent implements OnInit {
-  // public src = 'http://static.videogular.com/assets/videos/videogular.mp4';
   public playlist: string[] = [];
   public current: string;
   public iconStates = {
@@ -47,5 +46,15 @@ export class VideoPlayerComponent implements OnInit {
     this.video.nativeElement.src = this.current;
     this.video.nativeElement.load();
     this.video.nativeElement.play();
+  }
+
+  removeFromList(item2remove) {
+    this.playlist = this.playlist.filter(item => item !== item2remove);
+    if (!!this.playlist.length) {
+      return this.setCurrent();
+    }
+    this.video.nativeElement.pause();
+    this.video.nativeElement.currentTime = 0;
+    this.video.nativeElement.src = '';
   }
 }
