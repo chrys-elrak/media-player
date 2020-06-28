@@ -6,7 +6,7 @@ global.sharedData = {
   playlist: []
 };
 let win, playlist = new Set();
-const extensions = ['mkv', 'avi', 'mp4'], name = 'Files';
+const extensions = ['mkv', 'avi', 'mp4'], name = 'Files', height = 775, width = 800;
 const menuTemplate = new Menu.buildFromTemplate([{
   label: 'File',
   submenu: [
@@ -102,7 +102,7 @@ function setFiles(files) {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 800, height: 600, webPreferences: {
+    width, height, resizable: false, webPreferences: {
       nodeIntegration: true
     }
   });

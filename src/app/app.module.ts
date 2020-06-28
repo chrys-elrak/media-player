@@ -9,22 +9,28 @@ import {MatCardModule} from '@angular/material/card';
 import {VideoPlayerComponent} from './video-player/video-player.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatListModule} from '@angular/material/list';
+import {MatGridListModule} from '@angular/material/grid-list';
+import { ExtractFilenamePipe } from './extract-filename.pipe';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    VideoPlayerComponent
+    VideoPlayerComponent,
+    ExtractFilenamePipe
   ],
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        MatVideoModule,
-        MatSidenavModule,
-        MatCardModule,
-        MatButtonModule,
-        MatListModule,
-    ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    MatVideoModule,
+    MatSidenavModule,
+    MatCardModule,
+    MatButtonModule,
+    MatListModule,
+    MatGridListModule,
+    MatIconModule,
+  ],
   providers: [],
   bootstrap: [AppComponent]
 })

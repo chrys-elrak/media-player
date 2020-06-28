@@ -1,4 +1,16 @@
-<video id="video" #video width="100%" height="100%" controls autoplay></video>
-<mat-list role="list">
-  <mat-list-item role="listitem" *ngFor="let item of playlist" (click)="setCurrent(item)">{{item}}</mat-list-item>
-</mat-list>
+<div id="main">
+  <video id="video" #video width="100%" height="100%" controls autoplay></video>
+  <div class="playlist" *ngIf="!!playlist.length">
+    <mat-list role="list">
+      <div *ngFor="let item of playlist">
+        <button mat-icon-button (click)="setCurrent(item)">
+          <mat-icon>{{iconStates.play}}</mat-icon>
+        </button>
+        <mat-list-item role="listitem">{{item | extractFilename}}</mat-list-item>
+      </div>
+    </mat-list>
+  </div>
+  <h1 class="nodata" *ngIf="playlist.length === 0">No data</h1>
+</div>
+
+

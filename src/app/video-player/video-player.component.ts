@@ -13,12 +13,18 @@ export class VideoPlayerComponent implements OnInit {
   // public src = 'http://static.videogular.com/assets/videos/videogular.mp4';
   public playlist: string[] = [];
   public current: string;
+  public iconStates = {
+    play: 'play_circle_filled',
+    pause: 'pause_circle_filled',
+    stop: 'stop',
+    repeat: 'replay'
+  };
+  public currentIcon;
   @ViewChild('video') public video: ElementRef;
 
   constructor(zone: NgZone) {
     ipcRenderer.on('files-loaded', (event, arg) => {
       zone.run(() => {
-        console.log(arg);
         this.playlist = arg.files;
         this.setCurrent(this.playlist[0]);
       });
@@ -30,7 +36,6 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    ipcRenderer.send('init');
   }
 
   setCurrent(pathName = null) {
