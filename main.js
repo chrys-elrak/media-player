@@ -146,17 +146,6 @@ function createWindow() {
   });
 }
 
-function getFileMetaData(f) {
-  return new Promise((resole, reject) => {
-    ffmpeg.ffprobe(f, (err, meta) => {
-      if (err) reject(err);
-      else resole(meta);
-    });
-  });
-
-
-}
-
 ipcMain.on('playlist-updated', (event, newPlaylist) => {
   playlist = new Set(newPlaylist);
 });
