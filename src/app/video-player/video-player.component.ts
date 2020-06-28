@@ -22,7 +22,7 @@ export class VideoPlayerComponent implements OnInit {
   };
   @ViewChild('video') public video: ElementRef;
 
-  constructor(private snackBar: MatSnackBar, zone: NgZone,) {
+  constructor(private snackBar: MatSnackBar, zone: NgZone) {
     ipcRenderer.on('files-loaded', (event, arg) => {
       zone.run(() => {
         console.log(arg);
@@ -68,7 +68,7 @@ export class VideoPlayerComponent implements OnInit {
     this.video.nativeElement.play();
   }
 
-  stop() {
+  stopPlaying() {
     this.current.state = eFileState.STOP;
     this.video.nativeElement.pause();
     this.video.nativeElement.currentTime = 0;
