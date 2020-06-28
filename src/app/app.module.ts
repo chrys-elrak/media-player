@@ -10,7 +10,6 @@ import {VideoPlayerComponent} from './video-player/video-player.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatListModule} from '@angular/material/list';
 import {MatGridListModule} from '@angular/material/grid-list';
-import { ExtractFilenamePipe } from './extract-filename.pipe';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -20,7 +19,6 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
   declarations: [
     AppComponent,
     VideoPlayerComponent,
-    ExtractFilenamePipe
   ],
   imports: [
     BrowserModule,
