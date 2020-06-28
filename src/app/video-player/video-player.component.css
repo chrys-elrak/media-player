@@ -20,9 +20,6 @@
 }
 
 .nodata {
-  bottom: 20%;
-  left: 50%;
-  position: absolute;
   text-align: center;
   color: lightslategray;
   text-transform: uppercase;
