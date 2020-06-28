@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
-const videoTypes = [], audioTypes = [], pictureTypes = [];
+const videoTypes = ['mkv', 'mp4', 'avi'], audioTypes = ['wav', 'mp3'], pictureTypes = ['gif', 'jpeg', 'jpg', 'png', 'bmp', 'svg'];
 
 class File {
   constructor(pathname) {
@@ -20,7 +20,7 @@ class File {
     } else if (audioTypes.includes(this.filetype)) {
       this.mimetype = `audio/${this.filetype}`;
     } else if (pictureTypes.includes(this.filetype)) {
-      this.mimetype = `picture/${this.filetype}`;
+      this.mimetype = `images/${this.filetype}`;
     }
     this.url = url.format({
       pathname,
