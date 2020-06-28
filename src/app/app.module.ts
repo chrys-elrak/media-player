@@ -12,6 +12,7 @@ import {MatListModule} from '@angular/material/list';
 import {MatGridListModule} from '@angular/material/grid-list';
 import { ExtractFilenamePipe } from './extract-filename.pipe';
 import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import {MatIconModule} from '@angular/material/icon';
     MatListModule,
     MatGridListModule,
     MatIconModule,
+    MatMenuModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
