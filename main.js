@@ -9,11 +9,11 @@ require('dotenv').config();
 let win, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
 const menuTemplate = new Menu.buildFromTemplate([{
-  label: 'File',
+  label: 'Menu',
   submenu: [
     {
       label: 'Open file',
-      accelerator: process.platform === 'darwin' ? 'Cmd+Shift+O' : 'Ctrl+Shift+O',
+      accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
       async click() {
         if (win) {
           try {
@@ -31,7 +31,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
     },
     {
       label: 'Open files',
-      accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
+      accelerator: process.platform === 'darwin' ? 'Cmd+Shit+O' : 'Ctrl+Shift+O',
       async click() {
         if (win) {
           try {
