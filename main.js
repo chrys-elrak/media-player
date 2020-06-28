@@ -3,10 +3,6 @@ const path = require("path");
 const url = require("url");
 const fs = require("fs");
 
-global.sharedData = {
-  playlist: []
-};
-
 let win, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
 const menuTemplate = new Menu.buildFromTemplate([{
