@@ -72,13 +72,12 @@ export class VideoPlayerComponent implements OnInit {
     this.video.nativeElement.currentTime = 0;
   }
 
-  removeFromList(item2remove) {
-    const fileNameExtractor = new ExtractFilenamePipe();
-    this.playlist = this.playlist.filter(item => item !== item2remove);
-    this.snackBar.open(`${fileNameExtractor.transform(item2remove)} removed from playlist.`, null, {
+  removeFromList(file: File) {
+    this.playlist = this.playlist.filter(item => item.ino !== file.ino);
+    ipcRenderer.send('playlist-updated', this.playlist);
+    this.snackBar.open(`${file.basename} removed from playlist.`, null, {
       duration: 2000,
     });
-    console.log(item2remove, this.current);
     if (!!this.playlist.length) {
       return this.setCurrent();
     }

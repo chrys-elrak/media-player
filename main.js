@@ -160,6 +160,10 @@ function getFileMetaData(f) {
 
 }
 
+ipcMain.on('playlist-updated', (event, newPlaylist) => {
+  playlist = new Set(newPlaylist);
+});
+
 app.on("ready", createWindow);
 
 app.on("window-all-closed", () => {
