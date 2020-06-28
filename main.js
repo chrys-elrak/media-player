@@ -22,7 +22,7 @@ const openFileMenu = {
         })
         if (f.canceled) return null;
         let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
+        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge});
       } catch (e) {
         throw e;
       }
@@ -40,7 +40,7 @@ const openMultipleFileMenu = {
         });
         if (f.canceled) return null;
         let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
+        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge});
       } catch (e) {
         throw e;
       }
@@ -63,7 +63,7 @@ const openDirectoryMenu = {
           files.push(p);
         }
         let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-        win.webContents.send('files-loaded', {playlist: setFiles(files, merge), merge});
+        win.webContents.send('files-loaded', {playlist: setFiles(files, merge).map(f => new File(f)), merge});
       } catch (e) {
         throw e;
       }
@@ -101,7 +101,7 @@ function setFiles(files, merge = true) {
     playlist.clear();
   }
   files.forEach(f => {
-    playlist.add(new File(f));
+    playlist.add(f);
   });
   return [...playlist];
 }

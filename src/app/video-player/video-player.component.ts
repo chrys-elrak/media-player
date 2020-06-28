@@ -25,7 +25,6 @@ export class VideoPlayerComponent implements OnInit {
   @HostListener('document:keydown', ['$event'])
   onKeyDown(ev: KeyboardEvent) {
     if (this.current) {
-      console.log(ev);
       if (ev.code === 'Space') {
         if (this.current.state === eFileState.PAUSE) {
           this.current.state = eFileState.PLAY;
@@ -68,6 +67,11 @@ export class VideoPlayerComponent implements OnInit {
         this.playlist = arg.playlist;
         if (!this.current || !arg.merge) {
           this.setCurrent(this.playlist[0]);
+        }
+        // TO FIX
+        if (arg.merge && this.current.ino === this.playlist[0].ino) {
+          this.current.state = eFileState.PLAY;
+          this.playlist[0].state = eFileState.PLAY;
         }
       });
     });
