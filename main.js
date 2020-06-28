@@ -1,7 +1,9 @@
 const {app, BrowserWindow, Menu, dialog, ipcMain} = require("electron");
 const path = require("path");
 const url = require("url");
-const fs = require("fs");
+const File = require('./core/models/file');
+const walk = require('./core/helpers/walkDirectories');
+const {mergeItBox} = require('./core/helpers/box');
 require('dotenv').config();
 
 let win, playlist = new Set();
@@ -19,7 +21,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
               properties: ['openFile'], filters: [{name, extensions},]
             })
             if (f.canceled) return null;
-            let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
+            let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
             win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
           } catch (e) {
             throw e;
@@ -37,7 +39,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
               properties: ['openFile', "multiSelections"], filters: [{name, extensions},]
             });
             if (f.canceled) return null;
-            let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
+            let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
             win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
           } catch (e) {
             throw e;
@@ -57,10 +59,10 @@ const menuTemplate = new Menu.buildFromTemplate([{
             if (d.canceled) return null;
             const files = [];
             // Getting files from directory
-            for await (const p of walk(d.filePaths[0])) {
+            for await (const p of walk(d.filePaths[0], extensions)) {
               files.push(p);
             }
-            let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
+            let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
             win.webContents.send('files-loaded', {playlist: setFiles(files, merge), merge});
           } catch (e) {
             throw e;
@@ -89,17 +91,6 @@ const menuTemplate = new Menu.buildFromTemplate([{
   ]
 }]);
 
-async function* walk(dir) {
-  for await (const d of await fs.promises.opendir(dir)) {
-    const entry = path.join(dir, d.name);
-    if (d.isDirectory()) {
-      yield* walk(entry);
-    } else if (d.isFile() && extensions.includes(path.extname(d.name).slice(1))) {
-      yield entry;
-    }
-  }
-}
-
 function setFiles(files, merge = true) {
   if (!merge) {
     playlist.clear();
@@ -108,15 +99,6 @@ function setFiles(files, merge = true) {
     playlist.add(new File(f));
   });
   return [...playlist];
-}
-
-async function mergeItBox() {
-  return dialog.showMessageBox(win, {
-    title: 'Merge files',
-    type: 'info',
-    buttons: ['Yes', 'No'],
-    message: 'Do you want to merge the content of the folder to the exist playlist ?'
-  });
 }
 
 function createWindow() {
@@ -158,20 +140,3 @@ app.on("window-all-closed", () => {
   }
 });
 
-class File {
-  constructor(pathname) {
-    const stat = fs.statSync(pathname);
-    this.pathname = pathname;
-    this.basename = path.basename(pathname);
-    this.ino = stat.ino;
-    this.size = stat.size;
-    this.atime = stat.atime;
-    this.mtime = stat.mtime;
-    this.ctime = stat.ctime;
-    this.birthtime = stat.birthtime;
-    this.url = url.format({
-      pathname,
-      protocol: 'file:',
-    });
-  }
-}
