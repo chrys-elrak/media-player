@@ -3,6 +3,7 @@ const path = require('path');
 const url = require('url');
 const videoTypes = ['mkv', 'mp4', 'avi'], audioTypes = ['wav', 'mp3'],
   pictureTypes = ['gif', 'jpeg', 'jpg', 'png', 'bmp', 'svg'];
+const {STOP} = require('../enums/state');
 
 class File {
   constructor(pathname) {
@@ -27,6 +28,7 @@ class File {
       pathname,
       protocol: 'file:',
     });
+    this.state = STOP;
   }
 }
 

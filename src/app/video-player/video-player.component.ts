@@ -22,8 +22,8 @@ export class VideoPlayerComponent implements OnInit {
   };
   @ViewChild('video') public video: ElementRef;
 
-  @HostListener('document:keyup', ['$event'])
-  onKeyUp(ev: KeyboardEvent) {
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(ev: KeyboardEvent) {
     if (this.current) {
       console.log(ev);
       if (ev.code === 'Space') {
@@ -37,7 +37,6 @@ export class VideoPlayerComponent implements OnInit {
       }
       if (ev.shiftKey && ev.code === 'ArrowDown') {
         if (this.video.nativeElement.volume > .1) {
-          console.log(this.video.nativeElement.volume);
           this.video.nativeElement.volume -= .1;
         }
       }
@@ -95,7 +94,7 @@ export class VideoPlayerComponent implements OnInit {
             this.current.state = eFileState.PLAY;
             this.video.nativeElement.play();
           }
-          return null;
+          return ipcRenderer.send('playing-state', this.current);
         }
       }
       this.current = file;
@@ -105,17 +104,18 @@ export class VideoPlayerComponent implements OnInit {
     this.snackBar.open(`Now playing ${this.current.basename}.`, null, {
       duration: 2000,
     });
-    ipcRenderer.send('playing', this.current);
     this.current.state = eFileState.PLAY;
     this.video.nativeElement.src = this.current.url;
     this.video.nativeElement.load();
     this.video.nativeElement.play();
+    ipcRenderer.send('playing-state', this.current);
   }
 
   stopPlaying() {
     this.current.state = eFileState.STOP;
     this.video.nativeElement.pause();
     this.video.nativeElement.currentTime = 0;
+    ipcRenderer.send('playing-state', this.current);
   }
 
   getFileDetails(file: File) {

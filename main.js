@@ -1,13 +1,14 @@
-const {app, BrowserWindow, Menu, dialog, ipcMain} = require("electron");
+const {app, BrowserWindow, Menu, dialog, ipcMain, Notification} = require("electron");
 const path = require("path");
 const url = require("url");
 const moment = require('moment');
 const File = require('./core/models/file');
 const walk = require('./core/helpers/walkDirectories');
 const {mergeItBox} = require('./core/helpers/box');
+const eFileStat = require('./core/enums/state');
 require('dotenv').config();
 
-let win, playlist = new Set();
+let win, current, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
 const menuTemplate = new Menu.buildFromTemplate([{
   label: 'Menu',
@@ -123,6 +124,16 @@ function createWindow() {
     })
   ).then().catch();
   win.setMenu(menuTemplate);
+  win.on('minimize', () => {
+    if (!!current) {
+      const notification = new Notification({
+        title: 'Media player is running',
+        subtitle: 'You can change music/video from here',
+        body: `${current.basename}`,
+      });
+      notification.show();
+    }
+  });
   process.env.ENV === 'dev' ? win.webContents.openDevTools() : null;
   win.on("closed", () => {
     win = null;
@@ -136,9 +147,17 @@ ipcMain.on('playlist-updated', (event, newPlaylist) => {
 ipcMain.on('get-file-details', async (event, file) => {
   const r = await dialog.showMessageBox(win, {
     title: `Information`,
-    message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024,2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
+    message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024, 2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
     type: 'info',
   });
+});
+
+ipcMain.on('playing-state', (e, currentFile) => {
+  if (currentFile.state === eFileStat.PLAY) {
+    current = currentFile;
+  } else {
+    current = null;
+  }
 });
 
 app.on("ready", createWindow);
