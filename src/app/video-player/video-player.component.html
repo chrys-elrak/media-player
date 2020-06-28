@@ -23,9 +23,9 @@
             <mat-icon>delete</mat-icon>
             <span>Delete from file</span>
           </button>
-          <button mat-menu-item>
-            <mat-icon>grade</mat-icon>
-            <span>Rate</span>
+          <button mat-menu-item (click)="getFileDetails(item)">
+            <mat-icon>info</mat-icon>
+            <span>Details</span>
           </button>
         </mat-menu>
       </div>

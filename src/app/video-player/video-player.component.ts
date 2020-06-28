@@ -74,6 +74,11 @@ export class VideoPlayerComponent implements OnInit {
     this.video.nativeElement.currentTime = 0;
   }
 
+  getFileDetails(file: File) {
+    console.log(file);
+    ipcRenderer.send('get-file-details', file);
+  }
+
   removeFromList(file: File) {
     this.playlist = this.playlist.filter(item => item.ino !== file.ino);
     ipcRenderer.send('playlist-updated', this.playlist);

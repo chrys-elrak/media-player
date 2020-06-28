@@ -1,6 +1,7 @@
 const {app, BrowserWindow, Menu, dialog, ipcMain} = require("electron");
 const path = require("path");
 const url = require("url");
+const moment = require('moment');
 const File = require('./core/models/file');
 const walk = require('./core/helpers/walkDirectories');
 const {mergeItBox} = require('./core/helpers/box');
@@ -130,6 +131,14 @@ function createWindow() {
 
 ipcMain.on('playlist-updated', (event, newPlaylist) => {
   playlist = new Set(newPlaylist);
+});
+
+ipcMain.on('get-file-details', async (event, file) => {
+  const r = await dialog.showMessageBox(win, {
+    title: `Information`,
+    message: `Title: ${file.basename}\nSize: ${file.size}\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
+    type: 'info',
+  });
 });
 
 app.on("ready", createWindow);

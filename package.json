@@ -28,6 +28,7 @@
     "@types/electron": "^1.6.10",
     "dotenv": "^8.2.0",
     "mat-video": "^2.8.1",
+    "moment": "^2.27.0",
     "path": "^0.12.7",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
