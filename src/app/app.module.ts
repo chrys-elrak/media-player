@@ -13,6 +13,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import { ExtractFilenamePipe } from './extract-filename.pipe';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 
 @NgModule({
@@ -26,6 +27,7 @@ import {MatMenuModule} from '@angular/material/menu';
     BrowserAnimationsModule,
     MatVideoModule,
     MatSidenavModule,
+    MatSnackBarModule,
     MatCardModule,
     MatButtonModule,
     MatListModule,

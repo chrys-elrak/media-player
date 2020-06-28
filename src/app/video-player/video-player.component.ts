@@ -1,5 +1,6 @@
 import {Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
-import * as url from 'url';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {ExtractFilenamePipe} from '../extract-filename.pipe';
 
 declare var ipcRenderer: any;
 declare var remote: any;
@@ -21,7 +22,7 @@ export class VideoPlayerComponent implements OnInit {
   public currentIcon;
   @ViewChild('video') public video: ElementRef;
 
-  constructor(zone: NgZone) {
+  constructor(private snackBar: MatSnackBar, zone: NgZone,) {
     ipcRenderer.on('files-loaded', (event, arg) => {
       zone.run(() => {
         this.playlist = arg.files;
@@ -49,7 +50,15 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   removeFromList(item2remove) {
+    const fileNameExtractor = new ExtractFilenamePipe();
     this.playlist = this.playlist.filter(item => item !== item2remove);
+    this.snackBar.open(`${fileNameExtractor.transform(item2remove)} removed from playlist.`, null, {
+      duration: 2000,
+    });
+    console.log(item2remove, this.current);
+    if ('file:///' + item2remove !== this.current) {
+      return null;
+    }
     if (!!this.playlist.length) {
       return this.setCurrent();
     }
