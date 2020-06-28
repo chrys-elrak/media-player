@@ -1,6 +1,7 @@
 const {app, BrowserWindow, Menu, dialog, ipcMain} = require("electron");
 const path = require("path");
 const url = require("url");
+const fs = require("fs");
 global.sharedData = {
   playlist: []
 };
@@ -18,8 +19,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
             properties: ['openFile'], filters: [{name, extensions},]
           }).then(f => {
             if (f.canceled) return null;
-            console.log(f);
-            win.webContents.send('open-file', {
+            win.webContents.send('files-loaded', {
               files: setFiles(f.filePaths)
             });
           }).catch(e => console.error(e));
@@ -46,7 +46,20 @@ const menuTemplate = new Menu.buildFromTemplate([{
       label: 'Open folder',
       accelerator: process.platform === 'darwin' ? 'Cmd+Shift+F' : 'Ctrl+Shift+F',
       click() {
-
+        if (win) {
+          dialog.showOpenDialog({
+            properties: ['openDirectory'], filters: [{name, extensions},]
+          }).then(async (d) => {
+            if (d.canceled) return null;
+            const files = [];
+            for await (const p of walk(d.filePaths[0])) {
+              files.push(p);
+            }
+            win.webContents.send('files-loaded', {
+              files: setFiles(files)
+            });
+          }).catch(e => console.error(e));
+        }
       }
     },
     {
@@ -70,6 +83,17 @@ const menuTemplate = new Menu.buildFromTemplate([{
     }
   ]
 }]);
+
+async function* walk(dir) {
+  for await (const d of await fs.promises.opendir(dir)) {
+    const entry = path.join(dir, d.name);
+    if (d.isDirectory()) {
+      yield* walk(entry);
+    } else if (d.isFile() && extensions.includes(path.extname(d.name).slice(1))) {
+      yield entry;
+    }
+  }
+}
 
 function setFiles(files) {
   files.forEach(f => playlist.add(f));
