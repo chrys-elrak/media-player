@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const videoTypes = [], audioTypes = [], pictureTypes = [];
+
 class File {
   constructor(pathname) {
     const stat = fs.statSync(pathname);
@@ -12,6 +14,14 @@ class File {
     this.mtime = stat.mtime;
     this.ctime = stat.ctime;
     this.birthtime = stat.birthtime;
+    this.filetype = path.extname(pathname).slice(1, -1);
+    if (videoTypes.includes(this.filetype)) {
+      this.mimetype = `video/${this.filetype}`;
+    } else if (audioTypes.includes(this.filetype)) {
+      this.mimetype = `audio/${this.filetype}`;
+    } else if (pictureTypes.includes(this.filetype)) {
+      this.mimetype = `picture/${this.filetype}`;
+    }
     this.url = url.format({
       pathname,
       protocol: 'file:',
