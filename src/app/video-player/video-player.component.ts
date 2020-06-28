@@ -25,7 +25,6 @@ export class VideoPlayerComponent implements OnInit {
   constructor(private snackBar: MatSnackBar, zone: NgZone) {
     ipcRenderer.on('files-loaded', (event, arg) => {
       zone.run(() => {
-        console.log(arg);
         this.playlist = arg.playlist;
         if (!this.current || !arg.merge) {
           this.setCurrent(this.playlist[0]);
@@ -75,7 +74,6 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   getFileDetails(file: File) {
-    console.log(file);
     ipcRenderer.send('get-file-details', file);
   }
 
@@ -89,6 +87,14 @@ export class VideoPlayerComponent implements OnInit {
       this.video.nativeElement.pause();
       this.video.nativeElement.currentTime = 0;
       this.video.nativeElement.src = '';
+    }
+  }
+
+  playNext() {
+    const last = this.playlist[this.playlist.length - 1];
+    const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
+    if (this.current.ino !== last.ino && idx < this.playlist.length) {
+      this.setCurrent(this.playlist[idx + 1]);
     }
   }
 }
