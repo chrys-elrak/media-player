@@ -1,4 +1,6 @@
 const path = require("path");
+const fs = require('fs');
+
 async function* walk(dir, extensions) {
   for await (const d of await fs.promises.opendir(dir)) {
     const entry = path.join(dir, d.name);

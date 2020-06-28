@@ -136,7 +136,7 @@ ipcMain.on('playlist-updated', (event, newPlaylist) => {
 ipcMain.on('get-file-details', async (event, file) => {
   const r = await dialog.showMessageBox(win, {
     title: `Information`,
-    message: `Title: ${file.basename}\nSize: ${file.size}\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
+    message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024,2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
     type: 'info',
   });
 });
