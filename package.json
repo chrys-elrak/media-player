@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "electron": "electron .",
-    "electron-build": "ng build --base-href ./ && electron ."
+    "electron-build": "ng build --base-href ./ && electron .",
+    "build-win": "electron-packager . media-player --overwrite --asar --platform=win32 --arch=ia32 --icon=app/src/assets/icons/media-player.png --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"C Media Player\""
   },
   "private": true,
   "dependencies": {
@@ -25,6 +26,7 @@
     "@angular/platform-browser-dynamic": "~9.1.11",
     "@angular/router": "~9.1.11",
     "@types/electron": "^1.6.10",
+    "dotenv": "^8.2.0",
     "mat-video": "^2.8.1",
     "path": "^0.12.7",
     "rxjs": "~6.5.4",
@@ -42,6 +44,7 @@
     "codelyzer": "^5.1.2",
     "concurrently": "^5.2.0",
     "electron": "^9.0.4",
+    "electron-packager": "^15.0.0",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~5.0.0",
