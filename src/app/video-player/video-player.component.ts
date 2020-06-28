@@ -1,6 +1,5 @@
 import {Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {ExtractFilenamePipe} from '../extract-filename.pipe';
 import {eFileState, File} from '../models/File';
 
 declare var ipcRenderer: any;
@@ -26,8 +25,11 @@ export class VideoPlayerComponent implements OnInit {
   constructor(private snackBar: MatSnackBar, zone: NgZone,) {
     ipcRenderer.on('files-loaded', (event, arg) => {
       zone.run(() => {
+        console.log(arg);
         this.playlist = arg.playlist;
-        this.setCurrent(this.playlist[0]);
+        if (!this.current || !arg.merge) {
+          this.setCurrent(this.playlist[0]);
+        }
       });
     });
   }

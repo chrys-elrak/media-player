@@ -2,6 +2,7 @@ const {app, BrowserWindow, Menu, dialog, ipcMain} = require("electron");
 const path = require("path");
 const url = require("url");
 const fs = require("fs");
+require('dotenv').config();
 
 let win, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
@@ -19,7 +20,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
             })
             if (f.canceled) return null;
             let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
-            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge)});
+            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
           } catch (e) {
             throw e;
           }
@@ -37,7 +38,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
             });
             if (f.canceled) return null;
             let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
-            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge)});
+            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
           } catch (e) {
             throw e;
           }
@@ -60,7 +61,7 @@ const menuTemplate = new Menu.buildFromTemplate([{
               files.push(p);
             }
             let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
-            win.webContents.send('files-loaded', {playlist: setFiles(files, merge)});
+            win.webContents.send('files-loaded', {playlist: setFiles(files, merge), merge});
           } catch (e) {
             throw e;
           }
@@ -139,7 +140,7 @@ function createWindow() {
     })
   ).then().catch();
   win.setMenu(menuTemplate);
-  win.webContents.openDevTools();
+  process.env.ENV === 'dev' ? win.webContents.openDevTools() : null;
   win.on("closed", () => {
     win = null;
   });
