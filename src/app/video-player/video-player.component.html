@@ -1,5 +1,8 @@
 <div id="main">
-  <video id="video" #video width="100%" height="100%" controls autoplay (ended)="playNext()"></video>
+  <video id="video" #video width="100%" height="100%" controls autoplay (ended)="playNext(true)"></video>
+  <div class="controls">
+
+  </div>
   <div class="playlist" *ngIf="!!playlist.length">
     <mat-list role="list">
       <div *ngFor="let item of playlist">
