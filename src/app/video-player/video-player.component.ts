@@ -78,11 +78,10 @@ export class VideoPlayerComponent implements OnInit {
     this.snackBar.open(`${file.basename} removed from playlist.`, null, {
       duration: 2000,
     });
-    if (!!this.playlist.length) {
-      return this.setCurrent();
+    if (this.current.ino === file.ino) {
+      this.video.nativeElement.pause();
+      this.video.nativeElement.currentTime = 0;
+      this.video.nativeElement.src = '';
     }
-    this.video.nativeElement.pause();
-    this.video.nativeElement.currentTime = 0;
-    this.video.nativeElement.src = '';
   }
 }
