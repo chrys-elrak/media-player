@@ -4,9 +4,13 @@
     <mat-list role="list">
       <div *ngFor="let item of playlist">
         <button mat-icon-button (click)="setCurrent(item)">
-          <mat-icon>{{iconStates.play}}</mat-icon>
+          <mat-icon *ngIf="item.state === eStateFile.PLAY">{{ iconStates.pause }}</mat-icon>
+          <mat-icon *ngIf="item.state !== eStateFile.PLAY">{{ iconStates.play }}</mat-icon>
         </button>
-        <mat-list-item role="listitem">{{item | extractFilename}}</mat-list-item>
+        <button mat-icon-button (click)="stop()">
+          <mat-icon *ngIf="item.ino === current.ino">{{ iconStates.stop }}</mat-icon>
+        </button>
+        <mat-list-item role="listitem">{{item.basename}}</mat-list-item>
         <button mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>

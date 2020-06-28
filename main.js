@@ -2,11 +2,13 @@ const {app, BrowserWindow, Menu, dialog, ipcMain} = require("electron");
 const path = require("path");
 const url = require("url");
 const fs = require("fs");
+
 global.sharedData = {
   playlist: []
 };
+
 let win, playlist = new Set();
-const extensions = ['mkv', 'avi', 'mp4'], name = 'Files', height = 1000, width = 632;
+const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
 const menuTemplate = new Menu.buildFromTemplate([{
   label: 'File',
   submenu: [
@@ -20,9 +22,8 @@ const menuTemplate = new Menu.buildFromTemplate([{
               properties: ['openFile'], filters: [{name, extensions},]
             })
             if (f.canceled) return null;
-            win.webContents.send('files-loaded', {
-              files: setFiles(f.filePaths)
-            });
+            let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
+            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge)});
           } catch (e) {
             throw e;
           }
@@ -39,17 +40,8 @@ const menuTemplate = new Menu.buildFromTemplate([{
               properties: ['openFile', "multiSelections"], filters: [{name, extensions},]
             });
             if (f.canceled) return null;
-            let merge = true;
-            // Only ask to merge if playlist is not empty
-            if ([...playlist].length > 0) {
-              const r = await mergeItBox();
-              if (r.response !== 0) {
-                merge = false;
-              }
-            }
-            win.webContents.send('files-loaded', {
-              files: setFiles(f.filePaths, merge)
-            });
+            let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
+            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge)});
           } catch (e) {
             throw e;
           }
@@ -67,21 +59,12 @@ const menuTemplate = new Menu.buildFromTemplate([{
             });
             if (d.canceled) return null;
             const files = [];
-            let merge = true;
             // Getting files from directory
             for await (const p of walk(d.filePaths[0])) {
               files.push(p);
             }
-            // Only ask to merge if playlist is not empty
-            if ([...playlist].length > 0) {
-              const r = await mergeItBox();
-              if (r.response !== 0) {
-                merge = false;
-              }
-            }
-            win.webContents.send('files-loaded', {
-              files: setFiles(files, merge)
-            });
+            let merge = (playlist.size > 0) ? (await mergeItBox()).response === 0 : false;
+            win.webContents.send('files-loaded', {playlist: setFiles(files, merge)});
           } catch (e) {
             throw e;
           }
@@ -100,7 +83,6 @@ const menuTemplate = new Menu.buildFromTemplate([{
           checkboxLabel: 'Do not show it later',
         }
         dialog.showMessageBox(win, options).then(r => {
-          console.log(r);
           if (r.response === 0) {
             app.quit();
           }
@@ -125,12 +107,14 @@ function setFiles(files, merge = true) {
   if (!merge) {
     playlist.clear();
   }
-  files.forEach(f => playlist.add(f));
+  files.forEach(f => {
+    playlist.add(new File(f));
+  });
   return [...playlist];
 }
 
 async function mergeItBox() {
-  return await dialog.showMessageBox(win, {
+  return dialog.showMessageBox(win, {
     title: 'Merge files',
     type: 'info',
     buttons: ['Yes', 'No'],
@@ -165,6 +149,17 @@ function createWindow() {
   });
 }
 
+function getFileMetaData(f) {
+  return new Promise((resole, reject) => {
+    ffmpeg.ffprobe(f, (err, meta) => {
+      if (err) reject(err);
+      else resole(meta);
+    });
+  });
+
+
+}
+
 app.on("ready", createWindow);
 
 app.on("window-all-closed", () => {
@@ -172,3 +167,21 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+class File {
+  constructor(pathname) {
+    const stat = fs.statSync(pathname);
+    this.pathname = pathname;
+    this.basename = path.basename(pathname);
+    this.ino = stat.ino;
+    this.size = stat.size;
+    this.atime = stat.atime;
+    this.mtime = stat.mtime;
+    this.ctime = stat.ctime;
+    this.birthtime = stat.birthtime;
+    this.url = url.format({
+      pathname,
+      protocol: 'file:',
+    });
+  }
+}
