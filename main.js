@@ -13,52 +13,78 @@ const menuTemplate = new Menu.buildFromTemplate([{
     {
       label: 'Open file',
       accelerator: process.platform === 'darwin' ? 'Cmd+Shift+O' : 'Ctrl+Shift+O',
-      click() {
+      async click() {
         if (win) {
-          dialog.showOpenDialog({
-            properties: ['openFile'], filters: [{name, extensions},]
-          }).then(f => {
+          try {
+            const f = await dialog.showOpenDialog({
+              properties: ['openFile'], filters: [{name, extensions},]
+            })
             if (f.canceled) return null;
             win.webContents.send('files-loaded', {
               files: setFiles(f.filePaths)
             });
-          }).catch(e => console.error(e));
+          } catch (e) {
+            throw e;
+          }
         }
       }
     },
     {
       label: 'Open files',
       accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
-      click: () => {
+      async click() {
         if (win) {
-          dialog.showOpenDialog({
-            properties: ['openFile', "multiSelections"], filters: [{name, extensions},]
-          }).then(f => {
-            if (f.canceled) return null;
-            win.webContents.send('files-loaded', {
-              files: setFiles(f.filePaths)
+          try {
+            const f = await dialog.showOpenDialog({
+              properties: ['openFile', "multiSelections"], filters: [{name, extensions},]
             });
-          }).catch(e => console.error(e));
+            if (f.canceled) return null;
+            let merge = true;
+            // Only ask to merge if playlist is not empty
+            if ([...playlist].length > 0) {
+              const r = await mergeItBox();
+              if (r.response !== 0) {
+                merge = false;
+              }
+            }
+            win.webContents.send('files-loaded', {
+              files: setFiles(f.filePaths, merge)
+            });
+          } catch (e) {
+            throw e;
+          }
         }
       }
     },
     {
       label: 'Open folder',
       accelerator: process.platform === 'darwin' ? 'Cmd+Shift+F' : 'Ctrl+Shift+F',
-      click() {
+      async click() {
         if (win) {
-          dialog.showOpenDialog({
-            properties: ['openDirectory'], filters: [{name, extensions},]
-          }).then(async (d) => {
+          try {
+            const d = await dialog.showOpenDialog({
+              properties: ['openDirectory'], filters: [{name, extensions},]
+            });
             if (d.canceled) return null;
             const files = [];
+            let merge = true;
+            // Getting files from directory
             for await (const p of walk(d.filePaths[0])) {
               files.push(p);
             }
+            // Only ask to merge if playlist is not empty
+            if ([...playlist].length > 0) {
+              const r = await mergeItBox();
+              if (r.response !== 0) {
+                merge = false;
+              }
+            }
             win.webContents.send('files-loaded', {
-              files: setFiles(files)
+              files: setFiles(files, merge)
             });
-          }).catch(e => console.error(e));
+          } catch (e) {
+            throw e;
+          }
         }
       }
     },
@@ -95,9 +121,21 @@ async function* walk(dir) {
   }
 }
 
-function setFiles(files) {
+function setFiles(files, merge = true) {
+  if (!merge) {
+    playlist.clear();
+  }
   files.forEach(f => playlist.add(f));
   return [...playlist];
+}
+
+async function mergeItBox() {
+  return await dialog.showMessageBox(win, {
+    title: 'Merge files',
+    type: 'info',
+    buttons: ['Yes', 'No'],
+    message: 'Do you want to merge the content of the folder to the exist playlist ?'
+  });
 }
 
 function createWindow() {
