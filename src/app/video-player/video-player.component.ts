@@ -16,29 +16,29 @@ export class VideoPlayerComponent implements OnInit {
   @ViewChild('video') public video: ElementRef;
 
   constructor(zone: NgZone) {
-    ipcRenderer.on('files-loaded', (event, arg: string[]) => {
+    ipcRenderer.on('files-loaded', (event, arg) => {
       zone.run(() => {
-        this.playlist = [].concat([], arg);
-        remote.getGlobal('sharedData').playlist = this.playlist;
-        if (this.current === undefined) {
-          this.setCurrent(this.playlist[0]);
-          console.log('current is undefined');
-        }
-        console.log(this.playlist);
+        console.log(arg);
+        this.playlist = arg.files;
+        this.setCurrent(this.playlist[0]);
       });
     });
+  }
+
+  private updateSharedData(key, value) {
+    remote.getGlobal('sharedData')[key] = value;
   }
 
   ngOnInit(): void {
     ipcRenderer.send('init');
   }
 
-  openFiles() {
-    ipcRenderer.send('open-files');
-  }
-
-  setCurrent(pathName) {
-    this.current = `file:///${pathName}`;
+  setCurrent(pathName = null) {
+    if (pathName) {
+      this.current = `file:///${pathName}`;
+    } else {
+      this.current = `file:///${this.playlist[0]}`;
+    }
     this.video.nativeElement.src = this.current;
     this.video.nativeElement.load();
     this.video.nativeElement.play();
