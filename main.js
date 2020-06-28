@@ -10,68 +10,71 @@ require('dotenv').config();
 
 let win, current, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
+
+const openFileMenu = {
+  label: 'Open file',
+  accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
+  async click() {
+    if (win) {
+      try {
+        const f = await dialog.showOpenDialog({
+          properties: ['openFile'], filters: [{name, extensions},]
+        })
+        if (f.canceled) return null;
+        let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
+        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
+      } catch (e) {
+        throw e;
+      }
+    }
+  }
+};
+const openMultipleFileMenu = {
+  label: 'Open files',
+  accelerator: process.platform === 'darwin' ? 'Cmd+Shit+O' : 'Ctrl+Shift+O',
+  async click() {
+    if (win) {
+      try {
+        const f = await dialog.showOpenDialog({
+          properties: ['openFile', "multiSelections"], filters: [{name, extensions},]
+        });
+        if (f.canceled) return null;
+        let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
+        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
+      } catch (e) {
+        throw e;
+      }
+    }
+  }
+};
+const openDirectoryMenu = {
+  label: 'Open folder',
+  accelerator: process.platform === 'darwin' ? 'Cmd+Shift+F' : 'Ctrl+Shift+F',
+  async click() {
+    if (win) {
+      try {
+        const d = await dialog.showOpenDialog({
+          properties: ['openDirectory'], filters: [{name, extensions},]
+        });
+        if (d.canceled) return null;
+        const files = [];
+        // Getting files from directory
+        for await (const p of walk(d.filePaths[0], extensions)) {
+          files.push(p);
+        }
+        let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
+        win.webContents.send('files-loaded', {playlist: setFiles(files, merge), merge});
+      } catch (e) {
+        throw e;
+      }
+    }
+  }
+};
+
 const menuTemplate = new Menu.buildFromTemplate([{
   label: 'Menu',
   submenu: [
-    {
-      label: 'Open file',
-      accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
-      async click() {
-        if (win) {
-          try {
-            const f = await dialog.showOpenDialog({
-              properties: ['openFile'], filters: [{name, extensions},]
-            })
-            if (f.canceled) return null;
-            let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
-          } catch (e) {
-            throw e;
-          }
-        }
-      }
-    },
-    {
-      label: 'Open files',
-      accelerator: process.platform === 'darwin' ? 'Cmd+Shit+O' : 'Ctrl+Shift+O',
-      async click() {
-        if (win) {
-          try {
-            const f = await dialog.showOpenDialog({
-              properties: ['openFile', "multiSelections"], filters: [{name, extensions},]
-            });
-            if (f.canceled) return null;
-            let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-            win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge), merge});
-          } catch (e) {
-            throw e;
-          }
-        }
-      }
-    },
-    {
-      label: 'Open folder',
-      accelerator: process.platform === 'darwin' ? 'Cmd+Shift+F' : 'Ctrl+Shift+F',
-      async click() {
-        if (win) {
-          try {
-            const d = await dialog.showOpenDialog({
-              properties: ['openDirectory'], filters: [{name, extensions},]
-            });
-            if (d.canceled) return null;
-            const files = [];
-            // Getting files from directory
-            for await (const p of walk(d.filePaths[0], extensions)) {
-              files.push(p);
-            }
-            let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-            win.webContents.send('files-loaded', {playlist: setFiles(files, merge), merge});
-          } catch (e) {
-            throw e;
-          }
-        }
-      }
-    },
+    openFileMenu, openMultipleFileMenu, openDirectoryMenu,
     {
       label: 'Exit',
       accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
