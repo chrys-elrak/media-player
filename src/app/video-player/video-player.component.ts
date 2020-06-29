@@ -164,6 +164,26 @@ export class VideoPlayerComponent implements OnInit {
     }
   }
 
+  toggleState() {
+    if (this.current) {
+      if (this.current.state === eFileState.PLAY) {
+        this.current.state = eFileState.PAUSE;
+      } else if (this.current.state === eFileState.PAUSE) {
+        this.current.state = eFileState.PLAY;
+      }
+    }
+  }
+
+  setState(pause = false) {
+    if (this.current) {
+      if (pause) {
+        this.current.state = eFileState.PAUSE;
+      } else {
+        this.current.state = eFileState.PLAY;
+      }
+    }
+  }
+
   private playPrevious() {
     const first = this.playlist[0];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
