@@ -58,7 +58,20 @@ export class VideoPlayerComponent implements OnInit {
         this.video.nativeElement.currentTime -= 5;
       }
     }
+  }
 
+  onWheel(event: WheelEvent) {
+    if (this.current) {
+      if (event.deltaY > 0) { // scroll down
+        if (this.video.nativeElement.volume > .1) {
+          this.video.nativeElement.volume -= .1;
+        }
+      } else if (event.deltaY < 0) { // scroll up
+        if (this.video.nativeElement.volume < 1) {
+          this.video.nativeElement.volume += .1;
+        }
+      }
+    }
   }
 
   constructor(private snackBar: MatSnackBar, zone: NgZone) {

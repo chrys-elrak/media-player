@@ -1,5 +1,7 @@
 <div id="main">
-  <video id="video" #video width="100%" height="100%" controls autoplay (ended)="playNext(true)"></video>
+  <div id="outputScreen" (wheel)="onWheel($event)">
+    <video id="video" #video width="100%" height="100%" controls autoplay (ended)="playNext(true)"></video>
+  </div>
   <div class="controls">
 
   </div>
