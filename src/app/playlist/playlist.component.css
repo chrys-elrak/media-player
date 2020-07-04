@@ -1,0 +1,19 @@
+.playlist {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-height: 350px;
+  word-wrap: break-word;
+}
+
+.playlist > mat-list > div {
+  display: flex;
+  border-bottom: solid 1px lightslategray;
+}
+
+.nodata {
+  text-align: center;
+  color: lightslategray;
+  text-transform: uppercase;
+  font-size: larger;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
