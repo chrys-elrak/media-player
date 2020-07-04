@@ -15,6 +15,8 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { VideoControllerComponent } from './video-controller/video-controller.component';
 import { PlaylistComponent } from './playlist/playlist.component';
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatSliderModule} from "@angular/material/slider";
 
 
 @NgModule({
@@ -36,6 +38,8 @@ import { PlaylistComponent } from './playlist/playlist.component';
     MatGridListModule,
     MatIconModule,
     MatMenuModule,
+    MatProgressBarModule,
+    MatSliderModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
