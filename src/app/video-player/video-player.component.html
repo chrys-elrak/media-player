@@ -1,13 +1,13 @@
-<div id="main">
-  <div id="outputScreen" (wheel)="onWheel($event)">
-    <video id="video" #video width="100%" height="100%" controls autoplay (ended)="playNext(true)"
-           (click)="toggleState()" (pause)="setState(true)" (play)="setState()"></video>
+<div>
+  <div class="video-container" (wheel)="onWheel($event)">
+    <video #video width="100%" (ended)="playNext(true)"
+           (click)="toggleState()" (pause)="setState(true)" (play)="setState()" (loadeddata)="loadMetaData()" (timeupdate)="updateProgressBar()"></video>
   </div>
   <div id="video-controls" class="controls" data-state="hidden">
     <button id="playpause" type="button" data-state="play">Play/Pause</button>
     <button id="stop" type="button" data-state="stop">Stop</button>
     <div class="progress">
-      <progress id="progress" value="0" min="0" style="width: 100%">
+      <progress #progressbar id="progressbar" value="{{this.currentTime}}" min="0" style="width: 100%">
         <span id="progress-bar"></span>
       </progress>
     </div>
@@ -16,42 +16,44 @@
     <button id="voldec" type="button" data-state="voldown">Vol-</button>
     <button id="fs" type="button" data-state="go-fullscreen">Fullscreen</button>
   </div>
-  <div class="playlist" *ngIf="!!playlist.length">
-    <mat-list role="list">
-      <div *ngFor="let item of playlist">
-        <button mat-icon-button (click)="setCurrent(item)">
-          <mat-icon *ngIf="item.state === eStateFile.PLAY">{{ iconStates.pause }}</mat-icon>
-          <mat-icon *ngIf="item.state !== eStateFile.PLAY">{{ iconStates.play }}</mat-icon>
-        </button>
-        <button *ngIf="item.ino === current.ino" mat-icon-button (click)="stopPlaying()">
-          <mat-icon>{{ iconStates.stop }}</mat-icon>
-        </button>
-        <mat-list-item role="listitem">{{item.basename}}</mat-list-item>
-        <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="removeFromList(item)">
-            <mat-icon>remove</mat-icon>
-            <span>Remove from list</span>
+  <section style="float: right; width: 20%" *ngIf="false">
+    <div class="playlist" *ngIf="!maximized && !!playlist.length">
+      <mat-list role="list">
+        <div *ngFor="let item of playlist">
+          <button mat-icon-button (click)="setCurrent(item)">
+            <mat-icon *ngIf="item.state === eStateFile.PLAY">{{ iconStates.pause }}</mat-icon>
+            <mat-icon *ngIf="item.state !== eStateFile.PLAY">{{ iconStates.play }}</mat-icon>
           </button>
-          <button mat-menu-item disabled>
-            <mat-icon>delete</mat-icon>
-            <span>Delete from file</span>
+          <button *ngIf="item.ino === current.ino" mat-icon-button (click)="stopPlaying()">
+            <mat-icon>{{ iconStates.stop }}</mat-icon>
           </button>
-          <button mat-menu-item disabled>
-            <mat-icon>play_for_work</mat-icon>
-            <span>Convert to audio</span>
+          <mat-list-item role="listitem">{{item.basename}}</mat-list-item>
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
           </button>
-          <button mat-menu-item (click)="getFileDetails(item)">
-            <mat-icon>info</mat-icon>
-            <span>Details</span>
-          </button>
-        </mat-menu>
-      </div>
-    </mat-list>
-  </div>
-  <h1 class="nodata" *ngIf="playlist.length === 0">No data</h1>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="removeFromList(item)">
+              <mat-icon>remove</mat-icon>
+              <span>Remove from list</span>
+            </button>
+            <button mat-menu-item disabled>
+              <mat-icon>delete</mat-icon>
+              <span>Delete from file</span>
+            </button>
+            <button mat-menu-item disabled>
+              <mat-icon>play_for_work</mat-icon>
+              <span>Convert to audio</span>
+            </button>
+            <button mat-menu-item (click)="getFileDetails(item)">
+              <mat-icon>info</mat-icon>
+              <span>Details</span>
+            </button>
+          </mat-menu>
+        </div>
+      </mat-list>
+    </div>
+    <h1 class="nodata" *ngIf="playlist.length === 0">No data</h1>
+  </section>
 </div>
 
 

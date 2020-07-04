@@ -14,6 +14,9 @@ export class VideoPlayerComponent implements OnInit {
   public playlist: File[] = [];
   public current: File;
   public eStateFile = eFileState;
+  public maximized: boolean = false;
+  public duration: number = 0;
+  public currentTime: number = 0;
   public iconStates = {
     play: 'play_circle_filled',
     pause: 'pause_circle_filled',
@@ -21,6 +24,7 @@ export class VideoPlayerComponent implements OnInit {
     repeat: 'replay'
   };
   @ViewChild('video') public video: ElementRef;
+  @ViewChild('progressbar') public progressbar: ElementRef;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(ev: KeyboardEvent) {
@@ -88,6 +92,10 @@ export class VideoPlayerComponent implements OnInit {
         }
       });
     });
+
+    ipcRenderer.on('window-maximize', (event, value) => {
+      this.maximized = value;
+    });
   }
 
   private updateSharedData(key, value) {
@@ -152,6 +160,12 @@ export class VideoPlayerComponent implements OnInit {
     }
   }
 
+  loadMetaData() {
+    this.duration = this.video.nativeElement.duration;
+    this.currentTime = this.video.nativeElement.currentTime;
+    this.progressbar.nativeElement.max = this.duration;
+  }
+
   playNext(end: boolean = false) {
     const last = this.playlist[this.playlist.length - 1];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
@@ -192,6 +206,10 @@ export class VideoPlayerComponent implements OnInit {
     } else {
       this.replay();
     }
+  }
+
+  updateProgressBar() {
+    this.currentTime = this.video.nativeElement.currentTime;
   }
 
   private replay() {

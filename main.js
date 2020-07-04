@@ -9,7 +9,7 @@ const eFileStat = require('./core/enums/state');
 require('dotenv').config();
 
 let win, current, playlist = new Set();
-const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 1000, width = 632;
+const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 300, width = 600;
 
 const openFileMenu = {
   label: 'Open file',
@@ -110,10 +110,8 @@ function createWindow() {
   win = new BrowserWindow({
     width,
     height,
-    minWidth: 632,
-    minHeight: 600,
-    maxHeight: height,
-    maximizable: false,
+    minWidth: 300,
+    minHeight: 100,
     webPreferences: {
       nodeIntegration: true
     }
@@ -126,7 +124,9 @@ function createWindow() {
       slashes: true
     })
   ).then().catch();
+
   win.setMenu(menuTemplate);
+
   win.on('minimize', () => {
     if (!!current) {
       const notification = new Notification({
@@ -137,8 +137,15 @@ function createWindow() {
       notification.show();
     }
   });
+
+  win.on('maximize', (e) => {
+    win.webContents.send('window-maximize', true);
+  });
+  win.on('unmaximize', (e) => {
+    win.webContents.send('window-maximize', false);
+  });
   process.env.ENV === 'dev' ? win.webContents.openDevTools() : null;
-  win.on("closed", () => {
+  win.on("closed", (e) => {
     win = null;
   });
 }
