@@ -2,7 +2,7 @@
   <button id="playpause" type="button" data-state="play">Play/Pause</button>
   <button id="stop" type="button" data-state="stop">Stop</button>
   <div class="progress">
-    <progress #progressbar id="progressbar" [value]="currentTime" [max]="duration" min="0" style="width: 100%">
+    <progress id="progressbar" [value]="currentTime" [max]="duration" min="0" style="width: 100%">
       <span id="progress-bar"></span>
     </progress>
   </div>
