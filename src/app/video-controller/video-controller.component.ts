@@ -11,6 +11,11 @@ export class VideoControllerComponent implements OnInit {
   @Input() public volume: number = 1;
   @Output() private onSeek: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onVolumeChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() private onTogglePlay: EventEmitter<any> = new EventEmitter<any>();
+  @Output() private onNext: EventEmitter<any> = new EventEmitter<any>();
+  @Output() private onPrev: EventEmitter<any> = new EventEmitter<any>();
+  @Output() private onStop: EventEmitter<any> = new EventEmitter<any>();
+  @Output() private onUpdatePlayingState: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild('seekbar') public seekbar: ElementRef;
 
   public icons: Record<string, string> = {
@@ -43,22 +48,22 @@ export class VideoControllerComponent implements OnInit {
   }
 
   updatePlayingState() {
-
+    this.onUpdatePlayingState.emit();
   }
 
   next() {
-
+    this.onNext.emit();
   }
 
   prev() {
-
+    this.onPrev.emit();
   }
 
   stop() {
-
+    this.onStop.emit();
   }
 
   togglePlay() {
-
+    this.onTogglePlay.emit();
   }
 }
