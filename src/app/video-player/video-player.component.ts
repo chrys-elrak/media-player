@@ -1,6 +1,7 @@
 import {Component, ElementRef, HostListener, NgZone, OnInit, ViewChild} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {eFileState, File} from '../models/File';
+import {eFileState, MediaFile} from '../models/MediaFile';
+import {VideoControllerComponent} from "../video-controller/video-controller.component";
 
 declare var ipcRenderer: any;
 declare var remote: any;
@@ -11,20 +12,13 @@ declare var remote: any;
   styleUrls: ['./video-player.component.css']
 })
 export class VideoPlayerComponent implements OnInit {
-  public playlist: File[] = [];
-  public current: File;
-  public eStateFile = eFileState;
+  public playlist: MediaFile[] = [];
+  public current: MediaFile;
   public maximized: boolean = false;
   public duration: number = 0;
   public currentTime: number = 0;
-  public iconStates = {
-    play: 'play_circle_filled',
-    pause: 'pause_circle_filled',
-    stop: 'stop',
-    repeat: 'replay'
-  };
   @ViewChild('video') public video: ElementRef;
-  @ViewChild('progressbar') public progressbar: ElementRef;
+  @ViewChild('videoControllerComponent') public videoController: VideoControllerComponent;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(ev: KeyboardEvent) {
@@ -105,7 +99,7 @@ export class VideoPlayerComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  setCurrent(file: File = null) {
+  setCurrent(file: MediaFile = null) {
     if (file) {
       if (this.current) {
         if (this.current.ino !== file.ino) {
@@ -143,11 +137,11 @@ export class VideoPlayerComponent implements OnInit {
     ipcRenderer.send('playing-state', this.current);
   }
 
-  getFileDetails(file: File) {
+  getFileDetails(file: MediaFile) {
     ipcRenderer.send('get-file-details', file);
   }
 
-  removeFromList(file: File) {
+  removeFromList(file: MediaFile) {
     this.playlist = this.playlist.filter(item => item.ino !== file.ino);
     ipcRenderer.send('playlist-updated', this.playlist);
     this.snackBar.open(`${file.basename} removed from playlist.`, null, {
@@ -163,7 +157,7 @@ export class VideoPlayerComponent implements OnInit {
   loadMetaData() {
     this.duration = this.video.nativeElement.duration;
     this.currentTime = this.video.nativeElement.currentTime;
-    this.progressbar.nativeElement.max = this.duration;
+    this.videoController.duration = this.duration;
   }
 
   playNext(end: boolean = false) {

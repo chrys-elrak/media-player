@@ -13,12 +13,16 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { VideoControllerComponent } from './video-controller/video-controller.component';
+import { PlaylistComponent } from './playlist/playlist.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     VideoPlayerComponent,
+    VideoControllerComponent,
+    PlaylistComponent,
   ],
   imports: [
     BrowserModule,
