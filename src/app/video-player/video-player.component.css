@@ -1,31 +1,6 @@
-.playlist {
-  overflow-y: scroll;
-  overflow-x: hidden;
-  max-height: 350px;
-  word-wrap: break-word;
+.video-container {
+  width: inherit;
 }
-
-.playlist > mat-list > div {
-  display: flex;
-  border-bottom: solid 1px lightslategray;
-}
-
-.nodata {
-  text-align: center;
-  color: lightslategray;
-  text-transform: uppercase;
-  font-size: larger;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-/*.video-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}*/
 /*.video-container video {
   !* Make video to at least 100% wide and tall *!
   min-width: 100%;

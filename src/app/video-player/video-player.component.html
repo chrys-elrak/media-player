@@ -1,11 +1,11 @@
 <div>
   <div class="video-container" (wheel)="onWheel($event)">
-    <video #video width="100%" (ended)="playNext(true)"
+    <video #video width="100%" height="100%" (ended)="playNext(true)"
            (click)="toggleState()" (pause)="setState(true)" (play)="setState()" (loadeddata)="loadMetaData()"
            (timeupdate)="updateProgressBar()"></video>
   </div>
-  <app-video-controller #videoControllerComponent [currentTime]="currentTime"
-                        [duration]="duration"></app-video-controller>
+  <app-video-controller #videoControllerComponent [currentTime]="currentTime" [volume]="volume"
+                        [duration]="duration" (onSeek)="seek($event)" (onVolumeChange)="setVolume($event)"></app-video-controller>
 </div>
 
 

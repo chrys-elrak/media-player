@@ -17,6 +17,7 @@ export class VideoPlayerComponent implements OnInit {
   public maximized: boolean = false;
   public duration: number = 0;
   public currentTime: number = 0;
+  public volume: number = 1;
   @ViewChild('video') public video: ElementRef;
   @ViewChild('videoControllerComponent') public videoController: VideoControllerComponent;
 
@@ -33,12 +34,14 @@ export class VideoPlayerComponent implements OnInit {
         }
       }
       if (ev.shiftKey && ev.code === 'ArrowDown') {
-        if (this.video.nativeElement.volume > .1) {
-          this.video.nativeElement.volume -= .1;
+        if (this.volume > .1) {
+          this.volume -= .1;
+          this.setVolume(this.volume);
         }
       }
       if (ev.shiftKey && ev.code === 'ArrowUp') {
-        this.video.nativeElement.volume = this.video.nativeElement.volume !== 1 ? this.video.nativeElement.volume += .1 : 1;
+        this.volume = this.volume !== 1 ? this.volume += .1 : 1;
+        this.setVolume(this.volume);
       }
       if (ev.code === 'KeyN') {
         this.playNext();
@@ -204,6 +207,14 @@ export class VideoPlayerComponent implements OnInit {
 
   updateProgressBar() {
     this.currentTime = this.video.nativeElement.currentTime;
+  }
+
+  seek(value: number) {
+    this.video.nativeElement.currentTime = value;
+  }
+
+  setVolume(value: number) {
+    this.video.nativeElement.volume = value;
   }
 
   private replay() {
