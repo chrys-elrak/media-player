@@ -1,11 +1,15 @@
-<div>
+<div (window:resize)="onResize($event.target)">
   <div class="video-container" (wheel)="onWheel($event)">
-    <video #video width="100%" height="100%" (ended)="playNext(true)"
-           (click)="toggleState()" (pause)="setState(true)" (play)="setState()" (loadeddata)="loadMetaData()"
+    <video #video width="100%" height="100%" (ended)="playNext(true)" (loadeddata)="loadMetaData()"
            (timeupdate)="updateProgressBar()"></video>
   </div>
-  <app-video-controller #videoControllerComponent [currentTime]="currentTime" [volume]="volume"
-                        [duration]="duration" (onSeek)="seek($event)" (onVolumeChange)="setVolume($event)"></app-video-controller>
+  <app-video-controller #videoControllerComponent [currentTime]="currentTime" [volume]="volume" [state]="current?.state"
+                        (onNext)="playNext()"
+                        (onPrev)="playPrevious()"
+                        (onStop)="stopPlaying()"
+                        (onTogglePlay)="toggleState()"
+                        [duration]="duration" (onSeek)="seek($event)"
+                        (onVolumeChange)="setVolume($event)"></app-video-controller>
 </div>
 
 

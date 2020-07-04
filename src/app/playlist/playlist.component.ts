@@ -35,6 +35,23 @@ export class PlaylistComponent implements OnInit {
 
   }
 
+  /*getFileDetails(file: MediaFile) {
+    ipcRenderer.send('get-file-details', file);
+  }
+
+  removeFromList(file: MediaFile) {
+    this.playlist = this.playlist.filter(item => item.ino !== file.ino);
+    ipcRenderer.send('playlist-updated', this.playlist);
+    this.snackBar.open(`${file.basename} removed from playlist.`, null, {
+      duration: 2000,
+    });
+    if (this.current.ino === file.ino) {
+      this.video.nativeElement.pause();
+      this.video.nativeElement.currentTime = 0;
+      this.video.nativeElement.src = '';
+    }
+  }*/
+
   stopPlaying() {
 
   }

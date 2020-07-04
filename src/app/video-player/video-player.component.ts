@@ -95,9 +95,9 @@ export class VideoPlayerComponent implements OnInit {
     });
   }
 
-  private updateSharedData(key, value) {
-    remote.getGlobal('sharedData')[key] = value;
-  }
+  /*  private updateSharedData(key, value) {
+      remote.getGlobal('sharedData')[key] = value;
+    }*/
 
   ngOnInit(): void {
   }
@@ -140,23 +140,6 @@ export class VideoPlayerComponent implements OnInit {
     ipcRenderer.send('playing-state', this.current);
   }
 
-  getFileDetails(file: MediaFile) {
-    ipcRenderer.send('get-file-details', file);
-  }
-
-  removeFromList(file: MediaFile) {
-    this.playlist = this.playlist.filter(item => item.ino !== file.ino);
-    ipcRenderer.send('playlist-updated', this.playlist);
-    this.snackBar.open(`${file.basename} removed from playlist.`, null, {
-      duration: 2000,
-    });
-    if (this.current.ino === file.ino) {
-      this.video.nativeElement.pause();
-      this.video.nativeElement.currentTime = 0;
-      this.video.nativeElement.src = '';
-    }
-  }
-
   loadMetaData() {
     this.duration = this.video.nativeElement.duration;
     this.currentTime = this.video.nativeElement.currentTime;
@@ -175,33 +158,25 @@ export class VideoPlayerComponent implements OnInit {
     }
   }
 
-  toggleState() {
-    if (this.current) {
-      if (this.current.state === eFileState.PLAY) {
-        this.current.state = eFileState.PAUSE;
-      } else if (this.current.state === eFileState.PAUSE) {
-        this.current.state = eFileState.PLAY;
-      }
-    }
-  }
-
-  setState(pause = false) {
-    if (this.current) {
-      if (pause) {
-        this.current.state = eFileState.PAUSE;
-      } else {
-        this.current.state = eFileState.PLAY;
-      }
-    }
-  }
-
-  private playPrevious() {
+  playPrevious() {
     const first = this.playlist[0];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
     if (this.current.ino !== first.ino) {
       this.setCurrent(this.playlist[idx - 1]);
     } else {
       this.replay();
+    }
+  }
+
+  toggleState() {
+    if (this.current) {
+      if (this.current.state !== eFileState.PLAY) {
+        this.current.state = eFileState.PLAY;
+        this.video.nativeElement.play();
+      } else {
+        this.current.state = eFileState.PAUSE;
+        this.video.nativeElement.pause();
+      }
     }
   }
 
@@ -222,5 +197,10 @@ export class VideoPlayerComponent implements OnInit {
       this.video.nativeElement.currentTime = 0;
       this.video.nativeElement.play();
     }
+  }
+
+  onResize(e) {
+    this.video.nativeElement.height = e.outerHeight - 121;
+    this.video.nativeElement.width = e.outerWidth;
   }
 }

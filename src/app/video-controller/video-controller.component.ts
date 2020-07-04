@@ -1,4 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {eFileState} from "../models/MediaFile";
 
 @Component({
   selector: 'app-video-controller',
@@ -6,6 +7,7 @@ import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} f
   styleUrls: ['./video-controller.component.css']
 })
 export class VideoControllerComponent implements OnInit {
+  @Input() public state: eFileState = eFileState.STOP;
   @Input() public currentTime: number;
   @Input() public duration: number = 0;
   @Input() public volume: number = 1;
@@ -18,6 +20,7 @@ export class VideoControllerComponent implements OnInit {
   @Output() private onUpdatePlayingState: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild('seekbar') public seekbar: ElementRef;
 
+  public eState = eFileState;
   public icons: Record<string, string> = {
     play: 'play_arrow',
     pause: 'pause',

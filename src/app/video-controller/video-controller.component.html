@@ -3,7 +3,7 @@
               (input)="seekTo($event.value)"></mat-slider>
   <div style="float: right; margin-right: 5px;">00:00</div>
   <button mat-button (click)="togglePlay()">
-    <mat-icon>{{icons.play}}</mat-icon>
+    <mat-icon>{{state === eState.PLAY ? icons.pause : icons.play}}</mat-icon>
   </button>
   <button mat-button (click)="stop()">
     <mat-icon>{{icons.stop}}</mat-icon>
