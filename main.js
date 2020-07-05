@@ -8,7 +8,7 @@ const {mergeItBox} = require('./core/helpers/box');
 const eFileStat = require('./core/enums/state');
 require('dotenv').config();
 
-let win, current, playlist = new Set();
+let win, playlistWin, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 300, width = 600;
 
 const openFileMenu = {
@@ -118,7 +118,11 @@ function setFiles(files, merge = true) {
   return [...playlist];
 }
 
-function createWindow() {
+function initPlaylistWindow(show) {
+  playlistWin = new BrowserWindow({parent: win, width, height, title: 'MediaPlayer - Playlist', show});
+}
+
+async function createWindow() {
   win = new BrowserWindow({
     width,
     height,
@@ -129,13 +133,15 @@ function createWindow() {
     }
   });
 
-  win.loadURL(
+  await win.loadURL(
     url.format({
       pathname: path.join(__dirname, '/dist/media-player/index.html'),
       protocol: "file:",
       slashes: true
     })
-  ).then().catch();
+  );
+
+  initPlaylistWindow(false);
 
   win.setMenu(menuTemplate);
 
@@ -153,10 +159,13 @@ function createWindow() {
   win.on('maximize', (e) => {
     win.webContents.send('window-maximize', true);
   });
+
   win.on('unmaximize', (e) => {
     win.webContents.send('window-maximize', false);
   });
+
   process.env.ENV === 'dev' ? win.webContents.openDevTools() : null;
+
   win.on("closed", (e) => {
     win = null;
   });
@@ -184,15 +193,18 @@ ipcMain.on('playing-state', (e, currentFile) => {
   }
 });
 
-ipcMain.on('open-playlist', (e, open) => {
-  let playlistWin = new BrowserWindow({parent: win, width, height, title: 'MediaPlayer - Playlist'});
-  playlistWin.setMenu(null);
+ipcMain.on('open-playlist', async (e, open) => {
   if (open) {
     playlistWin.close();
+    win.webContents.send('playlist-opened', false);
   } else {
+    initPlaylistWindow(true);
+    playlistWin.setMenu(null);
+    await playlistWin.loadURL('https://www.facebook.com');
     playlistWin.show();
+    win.webContents.send('playlist-opened', true);
   }
-  win.webContents.send('playlist-opened', true);
+
   playlistWin.on('closed', () => {
     win.webContents.send('playlist-opened', false);
     playlistWin = null;
