@@ -165,14 +165,6 @@ async function createWindow() {
     }
   });
 
-  $win.on('maximize', (e) => {
-    $win.webContents.send('window-maximize', true);
-  });
-
-  $win.on('unmaximize', (e) => {
-    $win.webContents.send('window-maximize', false);
-  });
-
   process.env.ENV === 'dev' ? $win.webContents.openDevTools() : null;
 
   $win.on("closed", (e) => {

@@ -14,7 +14,6 @@ declare var remote: any;
 export class VideoPlayerComponent implements OnInit {
   public playlist: MediaFile[] = [];
   public current: MediaFile;
-  public maximized: boolean = false;
   public duration: number = 0;
   public currentTime: number = 0;
   public volume: number = 1;
@@ -60,7 +59,6 @@ export class VideoPlayerComponent implements OnInit {
       }
     }
   }
-
   onWheel(event: WheelEvent) {
     if (this.current) {
       if (event.deltaY > 0) { // scroll down
@@ -89,10 +87,6 @@ export class VideoPlayerComponent implements OnInit {
         }
       });
     });
-
-    ipcRenderer.on('window-maximize', (event, value) => {
-      this.maximized = value;
-    });
   }
 
   /*  private updateSharedData(key, value) {
@@ -102,7 +96,7 @@ export class VideoPlayerComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  setCurrent(file: MediaFile = null) {
+  private setCurrent(file: MediaFile = null) {
     if (file) {
       if (this.current) {
         if (this.current.ino !== file.ino) {
@@ -123,6 +117,10 @@ export class VideoPlayerComponent implements OnInit {
     } else {
       this.current = this.playlist[0];
     }
+    this.play();
+  }
+
+  private play() {
     this.snackBar.open(`Now playing ${this.current.basename}.`, null, {
       horizontalPosition: 'right',
       verticalPosition: 'top',
