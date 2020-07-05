@@ -206,6 +206,14 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   toggleFullScreen() {
-    this.video.nativeElement.requestFullscreen();
+    if (document.fullscreenElement && document.fullscreenElement.nodeName == 'VIDEO') {
+      this.video.nativeElement.webkitExitFullScreen();
+    } else {
+      this.video.nativeElement.webkitEnterFullScreen();
+    }
+  }
+
+  fullScreenChange() {
+    console.log('Press esc to exit full screen');
   }
 }
