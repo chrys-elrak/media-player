@@ -1,3 +1,4 @@
+/*noinspection CssInvalidPseudoSelector*/
 ::-webkit-media-controls {
   display: none !important;
 }
