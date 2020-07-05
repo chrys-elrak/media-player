@@ -10,3 +10,7 @@ video {
   left: 0;
   width: 100%;
 }
+
+.video-container {
+  background-color: dimgray;
+}
