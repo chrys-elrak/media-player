@@ -1,0 +1,10 @@
+{
+  "dest": "release-builds/installers",
+  "icon": "src/assets/media-player.png",
+  "bin": "media-player-linux",
+  "categories": [
+    "Video",
+    "Audio"
+  ],
+  "description": "A little video and audio player"
+}

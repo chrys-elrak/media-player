@@ -11,8 +11,11 @@
     "e2e": "ng e2e",
     "electron": "electron .",
     "electron-build": "ng build --base-href ./ && electron .",
-    "build-win": "electron-packager . media-player --overwrite --asar --platform=win32 --arch=ia32 --icon=app/src/assets/icons/media-player.png --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"C Media Player\""
+    "build-win": "electron-packager . media-player-win --overwrite --asar --platform=win32 --arch=ia32 --icon=src/assets/media-player.png --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Chrys Media Player\"",
+    "build-linux": "electron-packager . media-player-linux --overwrite --asar --platform=linux --arch=x64 --icon=src/assets/media-player.png --prune=true --out=release-builds",
+    "build-dpkg": "electron-installer-debian --src release-builds/media-player-linux-linux-x64 --arch x64 --config config.debian.json"
   },
+  "description": "A little video and audio player",
   "private": true,
   "dependencies": {
     "@angular/animations": "~9.1.11",
@@ -45,6 +48,7 @@
     "codelyzer": "^5.1.2",
     "concurrently": "^5.2.0",
     "electron": "^9.0.4",
+    "electron-installer-debian": "^3.1.0",
     "electron-packager": "^15.0.0",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
