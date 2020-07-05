@@ -5,7 +5,7 @@ const moment = require('moment');
 const File = require('./core/models/file');
 const walk = require('./core/helpers/walkDirectories');
 const {mergeItBox} = require('./core/helpers/box');
-const eFileStat = require('./core/enums/state');
+const eFileState = require('./core/enums/state');
 const {broadCastEvent} = require('./core/helpers/ipc');
 require('dotenv').config();
 
@@ -187,7 +187,7 @@ ipcMain.on('get-file-details', async (event, file) => {
 });
 
 ipcMain.on('playing-state', (e, currentFile) => {
-  if (currentFile.state === eFileStat.PLAY) {
+  if (currentFile.state === eFileState.PLAY) {
     current = currentFile;
   } else {
     current = null;
