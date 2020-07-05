@@ -155,6 +155,9 @@ export class VideoPlayerComponent implements OnInit {
     if (this.current.ino !== last.ino && idx < this.playlist.length) {
       this.setCurrent(this.playlist[idx + 1]);
     } else {
+      if (document.fullscreenElement && document.fullscreenElement.nodeName == 'VIDEO') {
+        this.video.nativeElement.webkitExitFullScreen();
+      }
       this.stopPlaying();
     }
   }
