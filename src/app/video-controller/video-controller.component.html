@@ -17,7 +17,7 @@
   <button mat-button (click)="updatePlayingState()">
     <mat-icon>{{icons.shuffle}}</mat-icon>
   </button>
-  <button mat-button (click)="updatePlayingState()">
+  <button mat-button>
     <mat-icon>{{icons.playlist}}</mat-icon>
   </button>
   <mat-slider min="0" (input)="setVolumeTo($event.value)" max="1" step=".1" [value]="volume"
