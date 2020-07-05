@@ -112,6 +112,6 @@ export class VideoControllerComponent implements OnInit {
   }
 
   togglePlaylistWindow() {
-    ipcRenderer.send('open-playlist', this.playlistOpen);
+    ipcRenderer.send('open-playlist', {open: this.playlistOpen});
   }
 }

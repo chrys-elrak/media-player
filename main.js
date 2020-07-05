@@ -201,8 +201,8 @@ ipcMain.on('playing-state', (e, currentFile) => {
   }
 });
 
-ipcMain.on('open-playlist', async (e, open) => {
-  if (open) {
+ipcMain.on('open-playlist', async (e, arg) => {
+  if (arg.open) {
     playlistWin.close();
     win.webContents.send('playlist-opened', false);
   } else {
