@@ -199,7 +199,7 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   onResize(e) {
-    this.video.nativeElement.height = e.outerHeight;
+    this.video.nativeElement.height = e.outerHeight - 150;
     this.video.nativeElement.width = e.outerWidth;
   }
 

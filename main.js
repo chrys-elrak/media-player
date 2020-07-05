@@ -94,6 +94,15 @@ const menuTemplate = new Menu.buildFromTemplate([{
       }
     }
   ]
+}, {
+  label: 'View', submenu: [{
+    label: 'Auto hide control',
+    type: "checkbox",
+    checked: true,
+    click(menuItem, browserWindow) {
+      browserWindow.webContents.send('hide-control', menuItem.checked);
+    }
+  }]
 }]);
 
 function setFiles(files, merge = true) {

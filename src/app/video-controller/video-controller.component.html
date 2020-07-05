@@ -1,4 +1,4 @@
-<div class="video-controller">
+<div class="video-controller" [class.hide]="hideControl" #videoController>
   <mat-slider [min]="0" [max]="duration" [value]="currentTime" color="primary" style="width: 100%"
               (input)="seekTo($event.value)"></mat-slider>
   <div style="float: right; margin-right: 5px;">{{currentDuration}}/{{timeDuration}}</div>

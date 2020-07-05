@@ -1,6 +1,8 @@
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {eFileState} from "../models/MediaFile";
 
+declare var ipcRenderer: any;
+
 @Component({
   selector: 'app-video-controller',
   templateUrl: './video-controller.component.html',
@@ -18,7 +20,7 @@ export class VideoControllerComponent implements OnInit {
   @Output() private onPrev: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onStop: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onUpdatePlayingState: EventEmitter<any> = new EventEmitter<any>();
-  @ViewChild('seekbar') public seekbar: ElementRef;
+  @ViewChild('videoController') public videoController: ElementRef;
 
   public eState = eFileState;
   public icons: Record<string, string> = {
@@ -33,9 +35,18 @@ export class VideoControllerComponent implements OnInit {
     playlist: 'playlist_play'
   };
   public currentDuration: string = '00:00';
-  public timeDuration:string  = '00:00';
+  public timeDuration: string = '00:00';
+  public hideControl: boolean = true;
 
   constructor() {
+    ipcRenderer.on('hide-control', (event, arg) => {
+      /*if (arg) {
+        this.videoController.nativeElement.style.transform = 'translateY(50px)';
+      } else {
+        this.videoController.nativeElement.style.transform = 'translateY(0px)';
+      }*/
+      this.hideControl = arg;
+    });
   }
 
   ngOnInit(): void {
