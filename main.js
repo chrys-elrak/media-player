@@ -195,7 +195,6 @@ ipcMain.on('playing-state', (e, currentFile) => {
 });
 
 ipcMain.on('open-playlist', async (e, arg) => {
-  if ($playlistWin) {
     if (arg.open) {
       $playlistWin.close();
       $win.webContents.send('playlist-opened', false);
@@ -211,12 +210,11 @@ ipcMain.on('open-playlist', async (e, arg) => {
       $playlistWin.webContents.openDevTools();
       $playlistWin.show();
       $win.webContents.send('playlist-opened', true);
+      $playlistWin.on('closed', () => {
+        $win.webContents.send('playlist-opened', false);
+        $playlistWin = null;
+      });
     }
-    $playlistWin.on('closed', () => {
-      $win.webContents.send('playlist-opened', false);
-      $playlistWin = null;
-    });
-  }
 });
 
 /* IPC stuff  */
