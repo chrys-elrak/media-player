@@ -37,6 +37,7 @@ export class VideoControllerComponent implements OnInit {
   public currentDuration: string = '00:00';
   public timeDuration: string = '00:00';
   public hideControl: boolean = true;
+  private playlistOpen: boolean = false;
 
   constructor() {
     ipcRenderer.on('hide-control', (event, arg) => {
@@ -47,6 +48,8 @@ export class VideoControllerComponent implements OnInit {
       }*/
       this.hideControl = arg;
     });
+
+    ipcRenderer.on('playlist-opened', (event, arg) => this.playlistOpen = arg);
   }
 
   ngOnInit(): void {
@@ -106,5 +109,9 @@ export class VideoControllerComponent implements OnInit {
 
   togglePlay() {
     this.onTogglePlay.emit();
+  }
+
+  togglePlaylistWindow() {
+    ipcRenderer.send('open-playlist', this.playlistOpen);
   }
 }

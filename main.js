@@ -71,39 +71,42 @@ const openDirectoryMenu = {
   }
 };
 
-const menuTemplate = new Menu.buildFromTemplate([{
-  label: 'Menu',
-  submenu: [
-    openFileMenu, openMultipleFileMenu, openDirectoryMenu,
-    {
-      label: 'Exit',
-      accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
-      click() {
-        let options = {
-          type: 'info',
-          title: 'Are you sure ?',
-          buttons: ["Yes", "Cancel"],
-          message: "Do you really want to quit?",
-          checkboxLabel: 'Do not show it later',
-        }
-        dialog.showMessageBox(win, options).then(r => {
-          if (r.response === 0) {
-            app.quit();
+const menuTemplate = new Menu.buildFromTemplate([
+  {
+    label: 'Menu',
+    submenu: [
+      openFileMenu, openMultipleFileMenu, openDirectoryMenu,
+      {
+        label: 'Exit',
+        accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
+        click() {
+          let options = {
+            type: 'info',
+            title: 'Are you sure ?',
+            buttons: ["Yes", "Cancel"],
+            message: "Do you really want to quit?",
+            checkboxLabel: 'Do not show it later',
           }
-        }).catch();
+          dialog.showMessageBox(win, options).then(r => {
+            if (r.response === 0) {
+              app.quit();
+            }
+          }).catch();
+        }
       }
-    }
-  ]
-}, {
-  label: 'View', submenu: [{
-    label: 'Auto hide control',
-    type: "checkbox",
-    checked: true,
-    click(menuItem, browserWindow) {
-      browserWindow.webContents.send('hide-control', menuItem.checked);
-    }
-  }]
-}]);
+    ]
+  },
+  {
+    label: 'View', submenu: [{
+      label: 'Auto hide control',
+      type: "checkbox",
+      checked: true,
+      click(menuItem, browserWindow) {
+        browserWindow.webContents.send('hide-control', menuItem.checked);
+      }
+    }]
+  }
+]);
 
 function setFiles(files, merge = true) {
   if (!merge) {
@@ -159,6 +162,8 @@ function createWindow() {
   });
 }
 
+/* IPC stuff  */
+
 ipcMain.on('playlist-updated', (event, newPlaylist) => {
   playlist = new Set(newPlaylist);
 });
@@ -178,6 +183,23 @@ ipcMain.on('playing-state', (e, currentFile) => {
     current = null;
   }
 });
+
+ipcMain.on('open-playlist', (e, open) => {
+  let playlistWin = new BrowserWindow({parent: win, width, height, title: 'MediaPlayer - Playlist'});
+  playlistWin.setMenu(null);
+  if (open) {
+    playlistWin.close();
+  } else {
+    playlistWin.show();
+  }
+  win.webContents.send('playlist-opened', true);
+  playlistWin.on('closed', () => {
+    win.webContents.send('playlist-opened', false);
+    playlistWin = null;
+  });
+});
+
+/* IPC stuff  */
 
 app.on("ready", createWindow);
 
