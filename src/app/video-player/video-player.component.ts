@@ -211,7 +211,4 @@ export class VideoPlayerComponent implements OnInit {
     }
   }
 
-  fullScreenChange() {
-    console.log('Press esc to exit full screen');
-  }
 }
