@@ -207,13 +207,12 @@ ipcMain.on('open-playlist', async (e, open) => {
   } else {
     initPlaylistWindow(true);
     playlistWin.setMenu(null);
-    const uri = url.format({
+    await playlistWin.loadURL(url.format({
       pathname: PATH_NAME,
       protocol: 'file:',
       slashes: true,
       hash: '/playlist'
-    });
-    await playlistWin.loadURL(uri);
+    }));
     playlistWin.webContents.openDevTools();
     playlistWin.show();
     win.webContents.send('playlist-opened', true);
