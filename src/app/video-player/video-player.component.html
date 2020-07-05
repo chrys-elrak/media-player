@@ -1,7 +1,7 @@
 <div (window:resize)="onResize($event.target)">
   <div class="video-container" (wheel)="onWheel($event)">
     <video #video width="100%" height="100%" (dblclick)="toggleFullScreen()"
-           (webkitfullscreenchange)="fullScreenChange()" (ended)="playNext(true)" (loadeddata)="loadMetaData()"
+           (webkitfullscreenchange)="fullScreenChange()" (ended)="playNext()" (loadeddata)="loadMetaData()"
            (timeupdate)="updateProgressBar()"></video>
   </div>
   <app-video-controller #videoControllerComponent [currentTime]="currentTime" [volume]="volume" [state]="current?.state"

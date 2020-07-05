@@ -146,15 +146,13 @@ export class VideoPlayerComponent implements OnInit {
     this.videoController.duration = this.duration;
   }
 
-  playNext(end: boolean = false) {
+  playNext() {
     const last = this.playlist[this.playlist.length - 1];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
     if (this.current.ino !== last.ino && idx < this.playlist.length) {
       this.setCurrent(this.playlist[idx + 1]);
     } else {
-      if (!end) {
-        this.replay();
-      }
+      this.stopPlaying();
     }
   }
 
