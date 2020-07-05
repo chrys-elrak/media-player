@@ -7,7 +7,7 @@ const walk = require('./core/helpers/walkDirectories');
 const {mergeItBox} = require('./core/helpers/box');
 const eFileStat = require('./core/enums/state');
 require('dotenv').config();
-const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html');
+const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'), TITLE = 'CMP (Chrys Media Player)';
 let win, playlistWin, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 300, width = 600;
 
@@ -123,7 +123,7 @@ function initPlaylistWindow(show) {
     parent: win,
     width,
     height,
-    title: 'MediaPlayer - Playlist',
+    title: `${TITLE} - Playlist`,
     show,
     webPreferences: {nodeIntegration: true}
   });
@@ -133,6 +133,7 @@ async function createWindow() {
   win = new BrowserWindow({
     width,
     height,
+    title: TITLE,
     minWidth: 620,
     minHeight: 120,
     webPreferences: {
