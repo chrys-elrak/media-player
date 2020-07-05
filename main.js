@@ -194,11 +194,11 @@ ipcMain.on('playing-state', (e, currentFile) => {
   }
 });
 
-ipcMain.on('open-$playlist', async (e, arg) => {
+ipcMain.on('open-playlist', async (e, arg) => {
   if ($playlistWin) {
     if (arg.open) {
       $playlistWin.close();
-      $win.webContents.send('$playlist-opened', false);
+      $win.webContents.send('playlist-opened', false);
     } else {
       initPlaylistWindow(true);
       $playlistWin.setMenu(null);
@@ -206,14 +206,14 @@ ipcMain.on('open-$playlist', async (e, arg) => {
         pathname: PATH_NAME,
         protocol: 'file:',
         slashes: true,
-        hash: '/$playlist'
+        hash: '/playlist'
       }));
       $playlistWin.webContents.openDevTools();
       $playlistWin.show();
-      $win.webContents.send('$playlist-opened', true);
+      $win.webContents.send('playlist-opened', true);
     }
     $playlistWin.on('closed', () => {
-      $win.webContents.send('$playlist-opened', false);
+      $win.webContents.send('playlist-opened', false);
       $playlistWin = null;
     });
   }
