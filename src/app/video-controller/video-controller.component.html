@@ -1,4 +1,4 @@
-<div class="video-controller" style="background-color: darkgoldenrod; width: 100%; height: auto;">
+<div class="video-controller">
   <mat-slider [min]="0" [max]="duration" [value]="currentTime" color="primary" style="width: 100%"
               (input)="seekTo($event.value)"></mat-slider>
   <div style="float: right; margin-right: 5px;">{{currentDuration}}/{{timeDuration}}</div>
@@ -17,8 +17,9 @@
   <button mat-button (click)="updatePlayingState()">
     <mat-icon>{{icons.shuffle}}</mat-icon>
   </button>
-  <mat-slider min="0" thumbLabel
-              [displayWith]="formatLabel" (input)="setVolumeTo($event.value)"
-              tickInterval="1000" max="1" step=".1" [value]="volume"
+  <button mat-button (click)="updatePlayingState()">
+    <mat-icon>{{icons.playlist}}</mat-icon>
+  </button>
+  <mat-slider min="0" (input)="setVolumeTo($event.value)" max="1" step=".1" [value]="volume"
               style="float: right;margin-right: 15px;"></mat-slider>
 </div>

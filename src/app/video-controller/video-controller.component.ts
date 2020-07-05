@@ -29,7 +29,8 @@ export class VideoControllerComponent implements OnInit {
     prev: 'skip_previous',
     repeatOnce: 'repeat_once',
     repeatAll: 'repeat_all',
-    shuffle: 'shuffle'
+    shuffle: 'shuffle',
+    playList: 'play_list'
   };
   public currentDuration: string = '00:00';
   public timeDuration:string  = '00:00';
@@ -40,6 +41,9 @@ export class VideoControllerComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  /*
+  * TO FIX: Handle video havings duration more than 60 minutesS
+  * */
   updateDuration() {
     let curmins: any = Math.floor(this.currentTime / 60);
     let cursecs: any = Math.floor(this.currentTime - curmins * 60);
@@ -69,10 +73,10 @@ export class VideoControllerComponent implements OnInit {
     this.onVolumeChange.emit(e);
   }
 
-  formatLabel(value: number) {
-    return Math.round(value * 100) + '%';
-  }
 
+  /*
+  * TO DO: Update playing state [shuffle, repeat, repeat_once]
+  * */
   updatePlayingState() {
     this.onUpdatePlayingState.emit();
   }
