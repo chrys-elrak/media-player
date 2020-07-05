@@ -124,7 +124,10 @@ export class VideoPlayerComponent implements OnInit {
       this.current = this.playlist[0];
     }
     this.snackBar.open(`Now playing ${this.current.basename}.`, null, {
-      duration: 2000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      duration: 1000,
+      politeness: 'polite',
     });
     this.current.state = eFileState.PLAY;
     this.video.nativeElement.src = this.current.url;
