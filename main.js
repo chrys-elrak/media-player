@@ -7,7 +7,7 @@ const walk = require('./core/helpers/walkDirectories');
 const {mergeItBox} = require('./core/helpers/box');
 const eFileStat = require('./core/enums/state');
 require('dotenv').config();
-
+const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html');
 let win, playlistWin, playlist = new Set();
 const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 300, width = 600;
 
@@ -119,7 +119,14 @@ function setFiles(files, merge = true) {
 }
 
 function initPlaylistWindow(show) {
-  playlistWin = new BrowserWindow({parent: win, width, height, title: 'MediaPlayer - Playlist', show});
+  playlistWin = new BrowserWindow({
+    parent: win,
+    width,
+    height,
+    title: 'MediaPlayer - Playlist',
+    show,
+    webPreferences: {nodeIntegration: true}
+  });
 }
 
 async function createWindow() {
@@ -135,7 +142,7 @@ async function createWindow() {
 
   await win.loadURL(
     url.format({
-      pathname: path.join(__dirname, '/dist/media-player/index.html'),
+      pathname: PATH_NAME,
       protocol: "file:",
       slashes: true
     })
@@ -200,7 +207,14 @@ ipcMain.on('open-playlist', async (e, open) => {
   } else {
     initPlaylistWindow(true);
     playlistWin.setMenu(null);
-    await playlistWin.loadURL('https://www.facebook.com');
+    const uri = url.format({
+      pathname: PATH_NAME,
+      protocol: 'file:',
+      slashes: true,
+      hash: '/playlist'
+    });
+    await playlistWin.loadURL(uri);
+    playlistWin.webContents.openDevTools();
     playlistWin.show();
     win.webContents.send('playlist-opened', true);
   }

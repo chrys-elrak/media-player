@@ -17,6 +17,7 @@ import { VideoControllerComponent } from './video-controller/video-controller.co
 import { PlaylistComponent } from './playlist/playlist.component';
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatSliderModule} from "@angular/material/slider";
+import { AppRoutingModule } from './app-routing.module';
 
 
 @NgModule({
@@ -40,6 +41,7 @@ import {MatSliderModule} from "@angular/material/slider";
     MatMenuModule,
     MatProgressBarModule,
     MatSliderModule,
+    AppRoutingModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -8,7 +8,7 @@ import {eFileState, MediaFile} from "../models/MediaFile";
 })
 export class PlaylistComponent implements OnInit {
   @Input() public current: MediaFile;
-  @Input() public playlist: MediaFile[];
+  @Input() public playlist: MediaFile[] = [];
   public eStateFile = eFileState;
   public iconStates = {
     play: 'play_circle_filled',
