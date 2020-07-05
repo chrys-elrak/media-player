@@ -31,11 +31,34 @@ export class VideoControllerComponent implements OnInit {
     repeatAll: 'repeat_all',
     shuffle: 'shuffle'
   };
+  public currentDuration: string = '00:00';
+  public timeDuration:string  = '00:00';
 
   constructor() {
   }
 
   ngOnInit(): void {
+  }
+
+  updateDuration() {
+    let curmins: any = Math.floor(this.currentTime / 60);
+    let cursecs: any = Math.floor(this.currentTime - curmins * 60);
+    let durmins: any = Math.floor(this.duration / 60);
+    let dursecs: any = Math.floor(this.duration - durmins * 60);
+    if (cursecs < 10) {
+      cursecs = "0" + cursecs;
+    }
+    if (dursecs < 10) {
+      dursecs = "0" + dursecs;
+    }
+    if (curmins < 10) {
+      curmins = "0" + curmins;
+    }
+    if (durmins < 10) {
+      durmins = "0" + durmins;
+    }
+    this.timeDuration = durmins + ":" + dursecs;
+    this.currentDuration = curmins + ":" + cursecs;
   }
 
   seekTo(e) {

@@ -1,3 +1,7 @@
+::-webkit-media-controls {
+  display:none !important;
+}
+
 .video-container {
   width: inherit;
 }

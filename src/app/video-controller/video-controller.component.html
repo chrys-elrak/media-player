@@ -1,7 +1,7 @@
 <div class="video-controller" style="background-color: darkgoldenrod; width: 100%; height: auto;">
   <mat-slider [min]="0" [max]="duration" [value]="currentTime" color="primary" style="width: 100%"
               (input)="seekTo($event.value)"></mat-slider>
-  <div style="float: right; margin-right: 5px;">00:00</div>
+  <div style="float: right; margin-right: 5px;">{{currentDuration}}/{{timeDuration}}</div>
   <button mat-button (click)="togglePlay()">
     <mat-icon>{{state === eState.PLAY ? icons.pause : icons.play}}</mat-icon>
   </button>

@@ -182,6 +182,7 @@ export class VideoPlayerComponent implements OnInit {
 
   updateProgressBar() {
     this.currentTime = this.video.nativeElement.currentTime;
+    this.videoController.updateDuration()
   }
 
   seek(value: number) {
@@ -202,5 +203,9 @@ export class VideoPlayerComponent implements OnInit {
   onResize(e) {
     this.video.nativeElement.height = e.outerHeight - 121;
     this.video.nativeElement.width = e.outerWidth;
+  }
+
+  toggleFullScreen() {
+    this.video.nativeElement.requestFullscreen();
   }
 }
