@@ -72,7 +72,7 @@ const OPEN_DIRECTORY_MENU = {
     }
   }
 };
-const menuTemplate = new Menu.buildFromTemplate([
+const MENU_TEMPLATE = new Menu.buildFromTemplate([
   {
     label: 'Menu',
     submenu: [
@@ -152,7 +152,7 @@ async function createWindow() {
 
   initPlaylistWindow(false);
 
-  $win.setMenu(menuTemplate);
+  $win.setMenu(MENU_TEMPLATE);
 
   $win.on('minimize', () => {
     if (!!current) {
