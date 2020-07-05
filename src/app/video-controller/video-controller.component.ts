@@ -30,7 +30,7 @@ export class VideoControllerComponent implements OnInit {
     repeatOnce: 'repeat_once',
     repeatAll: 'repeat_all',
     shuffle: 'shuffle',
-    playList: 'playlist_play'
+    playlist: 'playlist_play'
   };
   public currentDuration: string = '00:00';
   public timeDuration:string  = '00:00';
