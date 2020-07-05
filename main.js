@@ -8,10 +8,11 @@ const {mergeItBox} = require('./core/helpers/box');
 const eFileStat = require('./core/enums/state');
 const {broadCastEvent} = require('./core/helpers/ipc');
 require('dotenv').config();
-const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'), TITLE = 'CMP (Chrys Media Player)';
-let win, playlistWin, playlist = new Set();
-const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 300, width = 600;
 
+let win, playlistWin, playlist = new Set(); // GLOBAL VARIABLES
+
+const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'), TITLE = 'CMP (Chrys Media Player)';
+const extensions = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], name = 'Files', height = 300, width = 600;
 const openFileMenu = {
   label: 'Open file',
   accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
