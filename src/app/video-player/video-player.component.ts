@@ -33,13 +33,13 @@ export class VideoPlayerComponent implements OnInit {
           this.video.nativeElement.pause();
         }
       }
-      if (ev.shiftKey && ev.code === 'ArrowDown') {
+      if (ev.code === 'ArrowDown') {
         if (this.volume > .1) {
           this.volume -= .1;
           this.setVolume(this.volume);
         }
       }
-      if (ev.shiftKey && ev.code === 'ArrowUp') {
+      if (ev.code === 'ArrowUp') {
         this.volume = this.volume !== 1 ? this.volume += .1 : 1;
         this.setVolume(this.volume);
       }
@@ -52,10 +52,10 @@ export class VideoPlayerComponent implements OnInit {
       if (ev.code === 'KeyS') {
         this.stopPlaying();
       }
-      if (ev.shiftKey && ev.code === 'ArrowRight') {
+      if (ev.code === 'ArrowRight') {
         this.video.nativeElement.currentTime += 5;
       }
-      if (ev.shiftKey && ev.code === 'ArrowLeft') {
+      if (ev.code === 'ArrowLeft') {
         this.video.nativeElement.currentTime -= 5;
       }
     }
@@ -64,12 +64,12 @@ export class VideoPlayerComponent implements OnInit {
   onWheel(event: WheelEvent) {
     if (this.current) {
       if (event.deltaY > 0) { // scroll down
-        if (this.video.nativeElement.volume > .1) {
-          this.video.nativeElement.volume -= .1;
-        }
+        this.volume = this.volume !== 1 ? this.volume += .1 : 1;
+        this.setVolume(this.volume);
       } else if (event.deltaY < 0) { // scroll up
-        if (this.video.nativeElement.volume < 1) {
-          this.video.nativeElement.volume += .1;
+        if (this.volume > .1) {
+          this.volume -= .1;
+          this.setVolume(this.volume);
         }
       }
     }
