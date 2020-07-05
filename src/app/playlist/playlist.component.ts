@@ -1,6 +1,8 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {eFileState, MediaFile} from "../models/MediaFile";
 
+declare var ipcRenderer: any;
+
 @Component({
   selector: 'app-playlist',
   templateUrl: './playlist.component.html',
@@ -18,6 +20,9 @@ export class PlaylistComponent implements OnInit {
   };
 
   constructor() {
+    ipcRenderer.on('files-loaded', (event, arg) => {
+      this.playlist = arg.playlist;
+    })
   }
 
   ngOnInit(): void {

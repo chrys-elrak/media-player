@@ -6,6 +6,7 @@ const File = require('./core/models/file');
 const walk = require('./core/helpers/walkDirectories');
 const {mergeItBox} = require('./core/helpers/box');
 const eFileStat = require('./core/enums/state');
+const {broadCastEvent} = require('./core/helpers/ipc');
 require('dotenv').config();
 const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'), TITLE = 'CMP (Chrys Media Player)';
 let win, playlistWin, playlist = new Set();
@@ -22,7 +23,7 @@ const openFileMenu = {
         })
         if (f.canceled) return null;
         let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge});
+        broadCastEvent('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge})
       } catch (e) {
         throw e;
       }
@@ -40,7 +41,7 @@ const openMultipleFileMenu = {
         });
         if (f.canceled) return null;
         let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-        win.webContents.send('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge});
+        broadCastEvent('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge});
       } catch (e) {
         throw e;
       }
@@ -63,14 +64,13 @@ const openDirectoryMenu = {
           files.push(p);
         }
         let merge = (playlist.size > 0) ? (await mergeItBox(dialog, win)).response === 0 : false;
-        win.webContents.send('files-loaded', {playlist: setFiles(files, merge).map(f => new File(f)), merge});
+        broadCastEvent('files-loaded', {playlist: setFiles(files, merge).map(f => new File(f)), merge});
       } catch (e) {
         throw e;
       }
     }
   }
 };
-
 const menuTemplate = new Menu.buildFromTemplate([
   {
     label: 'Menu',
@@ -202,27 +202,28 @@ ipcMain.on('playing-state', (e, currentFile) => {
 });
 
 ipcMain.on('open-playlist', async (e, arg) => {
-  if (arg.open) {
-    playlistWin.close();
-    win.webContents.send('playlist-opened', false);
-  } else {
-    initPlaylistWindow(true);
-    playlistWin.setMenu(null);
-    await playlistWin.loadURL(url.format({
-      pathname: PATH_NAME,
-      protocol: 'file:',
-      slashes: true,
-      hash: '/playlist'
-    }));
-    playlistWin.webContents.openDevTools();
-    playlistWin.show();
-    win.webContents.send('playlist-opened', true);
+  if (playlistWin) {
+    if (arg.open) {
+      playlistWin.close();
+      win.webContents.send('playlist-opened', false);
+    } else {
+      initPlaylistWindow(true);
+      playlistWin.setMenu(null);
+      await playlistWin.loadURL(url.format({
+        pathname: PATH_NAME,
+        protocol: 'file:',
+        slashes: true,
+        hash: '/playlist'
+      }));
+      playlistWin.webContents.openDevTools();
+      playlistWin.show();
+      win.webContents.send('playlist-opened', true);
+    }
+    playlistWin.on('closed', () => {
+      win.webContents.send('playlist-opened', false);
+      playlistWin = null;
+    });
   }
-
-  playlistWin.on('closed', () => {
-    win.webContents.send('playlist-opened', false);
-    playlistWin = null;
-  });
 });
 
 /* IPC stuff  */
