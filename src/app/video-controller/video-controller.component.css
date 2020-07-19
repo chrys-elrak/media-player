@@ -11,7 +11,7 @@
 }
 
 .hide {
-  transform: translateY(50px);
+  /* transform: translateY(50px); */
 }
 
 .video-controller:hover {
