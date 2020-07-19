@@ -72,6 +72,14 @@ ipcMain.on('open-playlist', async (e, arg) => {
   }
 });
 
+ipcMain.on('get-file-details', async (event, file) => {
+  await dialog.showMessageBox($win, {
+    title: `Information`,
+    message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024, 2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
+    type: 'info',
+  });
+});
+
 /** FUNCTIONS **/
 
 /**

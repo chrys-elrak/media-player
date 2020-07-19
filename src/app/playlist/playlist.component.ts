@@ -49,14 +49,11 @@ export class PlaylistComponent implements OnInit, OnDestroy {
   }
 
   getFileDetails(item: MediaFile) {
-
+    this.ipcService.send('get-file-details', item);
   }
 
-  /*getFileDetails(file: MediaFile) {
-    ipcRenderer.send('get-file-details', file);
-  }
 
-  removeFromList(file: MediaFile) {
+  /*removeFromList(file: MediaFile) {
     this.playlist = this.playlist.filter(item => item.ino !== file.ino);
     ipcRenderer.send('playlist-updated', this.playlist);
     this.snackBar.open(`${file.basename} removed from playlist.`, null, {
