@@ -1,7 +1,7 @@
-import {Component, ElementRef, HostListener, NgZone, OnInit, ViewChild} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {eFileState, MediaFile} from '../models/MediaFile';
-import {VideoControllerComponent} from "../video-controller/video-controller.component";
+import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { eFileState, MediaFile } from '../models/MediaFile';
+import { VideoControllerComponent } from "../video-controller/video-controller.component";
 
 declare var ipcRenderer: any;
 declare var remote: any;
@@ -148,12 +148,13 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   playNext() {
-    const last = this.playlist[this.playlist.length - 1];
+    if (!this.playlist.length) return;
+    const last = this.playlist[this.playlist.length > 0 ? this.playlist.length - 1 : 0];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
     if (this.current.ino !== last.ino && idx < this.playlist.length) {
       this.setCurrent(this.playlist[idx + 1]);
     } else {
-      if (document.fullscreenElement && document.fullscreenElement.nodeName == 'VIDEO') {
+      if (document.fullscreenElement && document.fullscreenElement.nodeName === 'VIDEO') {
         this.video.nativeElement.webkitExitFullScreen();
       }
       this.stopPlaying();
@@ -161,6 +162,7 @@ export class VideoPlayerComponent implements OnInit {
   }
 
   playPrevious() {
+    if (!this.playlist.length) return;
     const first = this.playlist[0];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
     if (this.current.ino !== first.ino) {
