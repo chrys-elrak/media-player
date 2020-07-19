@@ -20,7 +20,7 @@ const {
 } = require('./core/helpers/ipc');
 require('dotenv').config();
 
-let $win, $playlistWin, $playlist = new Set(); // GLOBAL VARIABLES
+let $win, $playlistWin, $filePaths = new Set(), $playlist; // GLOBAL VARIABLES
 
 const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'),
   TITLE = 'CMP (Chrys Media Player)';
@@ -39,15 +39,11 @@ const OPEN_FILE_MENU = {
           filters: [{
             name: NAME,
             extensions: EXT
-          }, ]
+          },]
         })
         if (f.canceled) return null;
-        let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false; // Show prompt to user
-        broadCastEvent('files-loaded', {
-          playlist: setFiles(f.filePaths, merge).map(f => new File(f)),
-          current: 0,
-          merge
-        })
+        let merge = ($filePaths.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false; // Show prompt to user
+        filesLoaded('files-loaded', {files: f.filePaths, merge});
       } catch (e) {
         throw e;
       }
@@ -65,14 +61,11 @@ const OPEN_MULTIPLE_FILE_MENU = {
           filters: [{
             name: NAME,
             extensions: EXT
-          }, ]
+          },]
         });
         if (f.canceled) return null;
-        let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
-        broadCastEvent('files-loaded', {
-          playlist: setFiles(f.filePaths, merge).map(f => new File(f)),
-          merge
-        });
+        let merge = ($filePaths.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
+        filesLoaded('files-loaded', {files: f.filePaths, merge});
       } catch (e) {
         throw e;
       }
@@ -90,7 +83,7 @@ const OPEN_DIRECTORY_MENU = {
           filters: [{
             name: NAME,
             extensions: EXT
-          }, ]
+          },]
         });
         if (d.canceled) return null;
         const files = [];
@@ -98,11 +91,8 @@ const OPEN_DIRECTORY_MENU = {
         for await (const p of walk(d.filePaths[0], EXT)) {
           files.push(p);
         }
-        let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
-        broadCastEvent('files-loaded', {
-          playlist: setFiles(files, merge).map(f => new File(f)),
-          merge
-        });
+        let merge = ($filePaths.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
+        filesLoaded('files-loaded', {files, merge});
       } catch (e) {
         throw e;
       }
@@ -110,29 +100,29 @@ const OPEN_DIRECTORY_MENU = {
   }
 };
 const MENU_TEMPLATE = new Menu.buildFromTemplate([{
-    label: 'Menu',
-    submenu: [
-      OPEN_FILE_MENU, OPEN_MULTIPLE_FILE_MENU, OPEN_DIRECTORY_MENU,
-      {
-        label: 'Exit',
-        accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
-        click() {
-          let options = {
-            type: 'info',
-            title: 'Are you sure ?',
-            buttons: ["Yes", "Cancel"],
-            message: "Do you really want to quit?",
-            checkboxLabel: 'Do not show it later',
-          }
-          dialog.showMessageBox($win, options).then(r => {
-            if (r.response === 0) {
-              app.quit();
-            }
-          }).catch();
+  label: 'Menu',
+  submenu: [
+    OPEN_FILE_MENU, OPEN_MULTIPLE_FILE_MENU, OPEN_DIRECTORY_MENU,
+    {
+      label: 'Exit',
+      accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
+      click() {
+        let options = {
+          type: 'info',
+          title: 'Are you sure ?',
+          buttons: ["Yes", "Cancel"],
+          message: "Do you really want to quit?",
+          checkboxLabel: 'Do not show it later',
         }
+        dialog.showMessageBox($win, options).then(r => {
+          if (r.response === 0) {
+            app.quit();
+          }
+        }).catch();
       }
-    ]
-  },
+    }
+  ]
+},
   {
     label: 'View',
     submenu: [{
@@ -146,20 +136,81 @@ const MENU_TEMPLATE = new Menu.buildFromTemplate([{
   }
 ]);
 
+/* IPC stuff  */
+
+ipcMain.on('$filePaths-updated', (event, newPlaylist) => {
+  $filePaths = new Set(newPlaylist);
+});
+
+ipcMain.on('get-file-details', async (event, file) => {
+  const r = await dialog.showMessageBox($win, {
+    title: `Information`,
+    message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024, 2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
+    type: 'info',
+  });
+});
+
+ipcMain.on('playing-state', (e, currentFile) => {
+  if (currentFile.state === eFileState.PLAY) {
+    current = currentFile;
+  } else {
+    current = null;
+  }
+});
+
+ipcMain.on('open-playlist', async (e, arg) => {
+  if (arg.open) {
+    $playlistWin.close();
+    $win.webContents.send('playlist-opened', false);
+  } else {
+    initPlaylistWindow(true);
+    $playlistWin.setMenu(null);
+    await $playlistWin.loadURL(url.format({
+      pathname: PATH_NAME,
+      protocol: 'file:',
+      slashes: true,
+      hash: '/playlist'
+    }));
+    $playlistWin.webContents.openDevTools();
+    $playlistWin.show();
+    $win.webContents.send('playlist-opened', true);
+    $playlistWin.webContents.send("data", {
+      playlist: arg.playlist,
+      current: arg.current
+    });
+    $playlistWin.on('closed', () => {
+      $win.webContents.send('playlist-opened', false);
+      $playlistWin = null;
+    });
+  }
+});
+
+/* IPC stuff  */
+
+app.on("ready", createWindow); // Main function
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+/* function */
+
 /**
- * Create an array of files path from $playlist and return an array of these paths without duplications
+ * Create an array of files path from $filePaths and return an array of these paths without duplications
  * @param files{string[]}
  * @param merge{boolean}
  * @returns {string[]}
  */
 function setFiles(files, merge = true) {
   if (!merge) {
-    $playlist.clear();
+    $filePaths.clear();
   }
   files.forEach(f => {
-    $playlist.add(f);
+    $filePaths.add(f);
   });
-  return [...$playlist];
+  return [...$filePaths];
 }
 
 /**
@@ -225,61 +276,25 @@ async function createWindow() {
   });
 }
 
-/* IPC stuff  */
 
-ipcMain.on('$playlist-updated', (event, newPlaylist) => {
-  $playlist = new Set(newPlaylist);
-});
-
-ipcMain.on('get-file-details', async (event, file) => {
-  const r = await dialog.showMessageBox($win, {
-    title: `Information`,
-    message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024, 2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
-    type: 'info',
-  });
-});
-
-ipcMain.on('playing-state', (e, currentFile) => {
-  if (currentFile.state === eFileState.PLAY) {
-    current = currentFile;
-  } else {
-    current = null;
+/**
+ * Event emitter when files is loaded and ready to be broadcast to UI
+ * @param eventName{string}
+ * @param o{Object}
+ * @returns {undefined}
+ */
+function filesLoaded(eventName, o) {
+  let arg;
+  if (!o.hasOwnProperty('files') || !o.hasOwnProperty('merge')) {
+    throw new Error('Missing params');
   }
-});
-
-ipcMain.on('open-playlist', async (e, arg) => {
-  if (arg.open) {
-    $playlistWin.close();
-    $win.webContents.send('playlist-opened', false);
-  } else {
-    initPlaylistWindow(true);
-    $playlistWin.setMenu(null);
-    await $playlistWin.loadURL(url.format({
-      pathname: PATH_NAME,
-      protocol: 'file:',
-      slashes: true,
-      hash: '/playlist'
-    }));
-    $playlistWin.webContents.openDevTools();
-    $playlistWin.show();
-    $win.webContents.send('playlist-opened', true);
-    $playlistWin.webContents.send("data", {
-      playlist: arg.playlist,
-      current: arg.current
-    });
-    $playlistWin.on('closed', () => {
-      $win.webContents.send('playlist-opened', false);
-      $playlistWin = null;
-    });
+  $playlist = setFiles(o.files, o.merge).map(f => new File(f));
+  if (!$playlist.length) return;
+  arg = {
+    playlist: $playlist,
+    current: $playlist[0],
+    merge: o.merge,
   }
-});
-
-/* IPC stuff  */
-
-app.on("ready", createWindow);
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
+  console.log(arg)
+  broadCastEvent(eventName, arg);
+}
