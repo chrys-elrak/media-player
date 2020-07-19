@@ -49,6 +49,28 @@ app.on("window-all-closed", () => {
 
 /** INTER PROCESS COMMUNICATION **/
 
+ipcMain.on('open-playlist', async (e, arg) => {
+  if (arg.open) {
+    $playlistWin.close();
+    $win.webContents.send('playlist-opened', false);
+  } else {
+    initPlaylistWindow(true);
+    $playlistWin.setMenu(null);
+    await $playlistWin.loadURL(url.format({
+      pathname: PATH_NAME,
+      protocol: 'file:',
+      slashes: true,
+      hash: '/playlist'
+    }));
+    $playlistWin.webContents.openDevTools();
+    $playlistWin.show();
+    $win.webContents.send('playlist-opened', true);
+    $playlistWin.on('closed', () => {
+      $win.webContents.send('playlist-opened', false);
+      $playlistWin = null;
+    });
+  }
+});
 
 /** FUNCTIONS **/
 

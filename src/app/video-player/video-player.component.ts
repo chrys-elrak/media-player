@@ -1,22 +1,23 @@
-import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
+import {Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { eFileState, MediaFile } from '../models/MediaFile';
 import { VideoControllerComponent } from "../video-controller/video-controller.component";
-
-declare var ipcRenderer: any;
-declare var remote: any;
+import {IpcService} from "../services/ipc/ipc.service";
+import {Subscription} from "rxjs";
+import {SharedService} from "../services/shared/shared.service";
 
 @Component({
   selector: 'app-video-player',
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.css']
 })
-export class VideoPlayerComponent implements OnInit {
+export class VideoPlayerComponent implements OnInit,OnDestroy {
   public playlist: MediaFile[] = [];
   public current: MediaFile;
   public duration: number = 0;
   public currentTime: number = 0;
   public volume: number = 1;
+  private subscriptions: Subscription[] = [];
   @ViewChild('video') public video: ElementRef;
   @ViewChild('videoControllerComponent') public videoController: VideoControllerComponent;
 
@@ -73,27 +74,19 @@ export class VideoPlayerComponent implements OnInit {
     }
   }
 
-  constructor(private snackBar: MatSnackBar, zone: NgZone) {
-    ipcRenderer.on('files-loaded', (event, arg) => {
-      zone.run(() => {
-        this.playlist = arg.playlist;
-        if (!this.current || !arg.merge) {
-          this.setCurrent(this.playlist[0]);
-        }
-        // TO FIX
-        if (arg.merge && this.current.ino === this.playlist[0].ino) {
-          this.current.state = eFileState.PLAY;
-          this.playlist[0].state = eFileState.PLAY;
-        }
-      });
-    });
+  constructor(private snackBar: MatSnackBar, private zone: NgZone, private ipcService: IpcService, private sharedService: SharedService) {
   }
 
-  /*  private updateSharedData(key, value) {
-      remote.getGlobal('sharedData')[key] = value;
-    }*/
-
   ngOnInit(): void {
+    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(_=> {
+      this.playlist = this.sharedService.getSharedData('playlist');
+      this.setCurrent(this.sharedService.getSharedData('current'));
+    });
+    this.subscriptions.push(sub1);
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   private setCurrent(file: MediaFile = null) {
@@ -110,7 +103,7 @@ export class VideoPlayerComponent implements OnInit {
             this.current.state = eFileState.PLAY;
             this.video.nativeElement.play();
           }
-          return ipcRenderer.send('playing-state', this.current);
+          return this.ipcService.send('playing-state', this.current);
         }
       }
       this.current = file;
@@ -131,14 +124,14 @@ export class VideoPlayerComponent implements OnInit {
     this.video.nativeElement.src = this.current.url;
     this.video.nativeElement.load();
     this.video.nativeElement.play();
-    ipcRenderer.send('playing-state', this.current);
+    this.ipcService.send('playing-state', this.current);
   }
 
   stopPlaying() {
     this.current.state = eFileState.STOP;
     this.video.nativeElement.pause();
     this.video.nativeElement.currentTime = 0;
-    ipcRenderer.send('playing-state', this.current);
+    this.ipcService.send('playing-state', this.current);
   }
 
   loadMetaData() {

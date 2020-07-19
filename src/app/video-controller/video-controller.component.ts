@@ -1,21 +1,21 @@
-import { MediaFile } from './../models/MediaFile';
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { eFileState } from "../models/MediaFile";
+import {MediaFile} from '../models/MediaFile';
+import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {eFileState} from "../models/MediaFile";
+import {IpcService} from "../services/ipc/ipc.service";
+import {Subscription} from "rxjs";
+import {SharedService} from "../services/shared/shared.service";
 
-declare var ipcRenderer: any;
 
 @Component({
   selector: 'app-video-controller',
   templateUrl: './video-controller.component.html',
   styleUrls: ['./video-controller.component.css']
 })
-export class VideoControllerComponent implements OnInit {
+export class VideoControllerComponent implements OnInit, OnDestroy {
   @Input() public state: eFileState = eFileState.STOP;
   @Input() public currentTime: number;
   @Input() public duration: number = 0;
   @Input() public volume: number = 1;
-  @Input() public playlist: MediaFile[];
-  @Input() public current: MediaFile;
   @Output() private onSeek: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onVolumeChange: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onTogglePlay: EventEmitter<any> = new EventEmitter<any>();
@@ -41,21 +41,21 @@ export class VideoControllerComponent implements OnInit {
   public timeDuration: string = '00:00';
   public hideControl: boolean = true;
   private playlistOpen: boolean = false;
+  private subscriptions: Subscription[] = [];
 
-  constructor() {
-    ipcRenderer.on('hide-control', (event, arg) => {
-      /*if (arg) {
-        this.videoController.nativeElement.style.transform = 'translateY(50px)';
-      } else {
-        this.videoController.nativeElement.style.transform = 'translateY(0px)';
-      }*/
-      this.hideControl = arg;
-    });
-
-    ipcRenderer.on('playlist-opened', (event, arg) => this.playlistOpen = arg);
+  constructor(private ipcService: IpcService, private sharedService: SharedService) {
   }
 
   ngOnInit(): void {
+    let sub1 = this.ipcService.on('playlist-opened').subscribe((data: any) => {
+      this.playlistOpen = data
+    });
+
+    this.subscriptions.push(sub1);
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
   /*
@@ -115,6 +115,6 @@ export class VideoControllerComponent implements OnInit {
   }
 
   togglePlaylistWindow() {
-    ipcRenderer.send('open-playlist', { open: this.playlistOpen, playlist: this.playlist, current: this.current });
+    this.ipcService.send('open-playlist', {open: this.playlistOpen});
   }
 }
