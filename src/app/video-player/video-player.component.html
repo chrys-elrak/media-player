@@ -9,7 +9,10 @@
                         (onStop)="stopPlaying()"
                         (onTogglePlay)="toggleState()"
                         [duration]="duration" (onSeek)="seek($event)"
-                        (onVolumeChange)="setVolume($event)"></app-video-controller>
+                        (onVolumeChange)="setVolume($event)"
+                        [playlist]="playlist"
+                        [current]="current"
+                        ></app-video-controller>
 </div>
 
 

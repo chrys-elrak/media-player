@@ -1,18 +1,33 @@
-const {app, BrowserWindow, Menu, dialog, ipcMain, Notification} = require("electron");
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  dialog,
+  ipcMain,
+  Notification
+} = require("electron");
 const path = require("path");
 const url = require("url");
 const moment = require('moment');
 const File = require('./core/models/file');
 const walk = require('./core/helpers/walkDirectories');
-const {mergeItBox} = require('./core/helpers/box');
+const {
+  mergeItBox
+} = require('./core/helpers/box');
 const eFileState = require('./core/enums/state');
-const {broadCastEvent} = require('./core/helpers/ipc');
+const {
+  broadCastEvent
+} = require('./core/helpers/ipc');
 require('dotenv').config();
 
 let $win, $playlistWin, $playlist = new Set(); // GLOBAL VARIABLES
 
-const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'), TITLE = 'CMP (Chrys Media Player)';
-const EXT = ['mkv', 'avi', 'mp4', 'mp3', 'wav'], NAME = 'Files', HEIGHT = 300, WIDTH = 600;
+const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'),
+  TITLE = 'CMP (Chrys Media Player)';
+const EXT = ['mkv', 'avi', 'mp4', 'mp3', 'wav'],
+  NAME = 'Files',
+  HEIGHT = 300,
+  WIDTH = 600;
 const OPEN_FILE_MENU = {
   label: 'Open file',
   accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
@@ -20,11 +35,18 @@ const OPEN_FILE_MENU = {
     if ($win) {
       try {
         const f = await dialog.showOpenDialog({
-          properties: ['openFile'], filters: [{name: NAME, extensions: EXT},]
+          properties: ['openFile'],
+          filters: [{
+            name: NAME,
+            extensions: EXT
+          }, ]
         })
         if (f.canceled) return null;
         let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
-        broadCastEvent('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge})
+        broadCastEvent('files-loaded', {
+          playlist: setFiles(f.filePaths, merge).map(f => new File(f)),
+          merge
+        })
       } catch (e) {
         throw e;
       }
@@ -38,11 +60,18 @@ const OPEN_MULTIPLE_FILE_MENU = {
     if ($win) {
       try {
         const f = await dialog.showOpenDialog({
-          properties: ['openFile', "multiSelections"], filters: [{name: NAME, extensions: EXT},]
+          properties: ['openFile', "multiSelections"],
+          filters: [{
+            name: NAME,
+            extensions: EXT
+          }, ]
         });
         if (f.canceled) return null;
         let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
-        broadCastEvent('files-loaded', {playlist: setFiles(f.filePaths, merge).map(f => new File(f)), merge});
+        broadCastEvent('files-loaded', {
+          playlist: setFiles(f.filePaths, merge).map(f => new File(f)),
+          merge
+        });
       } catch (e) {
         throw e;
       }
@@ -56,7 +85,11 @@ const OPEN_DIRECTORY_MENU = {
     if ($win) {
       try {
         const d = await dialog.showOpenDialog({
-          properties: ['openDirectory'], filters: [{name: NAME, extensions: EXT},]
+          properties: ['openDirectory'],
+          filters: [{
+            name: NAME,
+            extensions: EXT
+          }, ]
         });
         if (d.canceled) return null;
         const files = [];
@@ -65,15 +98,17 @@ const OPEN_DIRECTORY_MENU = {
           files.push(p);
         }
         let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
-        broadCastEvent('files-loaded', {playlist: setFiles(files, merge).map(f => new File(f)), merge});
+        broadCastEvent('files-loaded', {
+          playlist: setFiles(files, merge).map(f => new File(f)),
+          merge
+        });
       } catch (e) {
         throw e;
       }
     }
   }
 };
-const MENU_TEMPLATE = new Menu.buildFromTemplate([
-  {
+const MENU_TEMPLATE = new Menu.buildFromTemplate([{
     label: 'Menu',
     submenu: [
       OPEN_FILE_MENU, OPEN_MULTIPLE_FILE_MENU, OPEN_DIRECTORY_MENU,
@@ -98,7 +133,8 @@ const MENU_TEMPLATE = new Menu.buildFromTemplate([
     ]
   },
   {
-    label: 'View', submenu: [{
+    label: 'View',
+    submenu: [{
       label: 'Auto hide control',
       type: "checkbox",
       checked: true,
@@ -126,7 +162,9 @@ function initPlaylistWindow(show) {
     height: HEIGHT,
     title: `${TITLE} - Playlist`,
     show,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
 }
 
@@ -195,26 +233,30 @@ ipcMain.on('playing-state', (e, currentFile) => {
 });
 
 ipcMain.on('open-playlist', async (e, arg) => {
-    if (arg.open) {
-      $playlistWin.close();
+  if (arg.open) {
+    $playlistWin.close();
+    $win.webContents.send('playlist-opened', false);
+  } else {
+    initPlaylistWindow(true);
+    $playlistWin.setMenu(null);
+    await $playlistWin.loadURL(url.format({
+      pathname: PATH_NAME,
+      protocol: 'file:',
+      slashes: true,
+      hash: '/playlist'
+    }));
+    $playlistWin.webContents.openDevTools();
+    $playlistWin.show();
+    $win.webContents.send('playlist-opened', true);
+    $playlistWin.webContents.send("data", {
+      playlist: arg.playlist,
+      current: arg.current
+    });
+    $playlistWin.on('closed', () => {
       $win.webContents.send('playlist-opened', false);
-    } else {
-      initPlaylistWindow(true);
-      $playlistWin.setMenu(null);
-      await $playlistWin.loadURL(url.format({
-        pathname: PATH_NAME,
-        protocol: 'file:',
-        slashes: true,
-        hash: '/playlist'
-      }));
-      $playlistWin.webContents.openDevTools();
-      $playlistWin.show();
-      $win.webContents.send('playlist-opened', true);
-      $playlistWin.on('closed', () => {
-        $win.webContents.send('playlist-opened', false);
-        $playlistWin = null;
-      });
-    }
+      $playlistWin = null;
+    });
+  }
 });
 
 /* IPC stuff  */
@@ -226,4 +268,3 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-

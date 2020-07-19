@@ -1,5 +1,5 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {eFileState, MediaFile} from "../models/MediaFile";
+import { Component, Input, OnInit, ViewChild, NgZone } from '@angular/core';
+import { eFileState, MediaFile } from "../models/MediaFile";
 
 declare var ipcRenderer: any;
 
@@ -19,10 +19,13 @@ export class PlaylistComponent implements OnInit {
     repeat: 'replay'
   };
 
-  constructor() {
-    ipcRenderer.on('files-loaded', (event, arg) => {
-      this.playlist = arg.playlist;
-    })
+  constructor(private zone: NgZone) {
+    ipcRenderer.on('data', (event, arg) => {
+      this.zone.run(() => {
+        this.playlist = arg.playlist;
+        this.current = arg.current;
+      });
+    });
   }
 
   ngOnInit(): void {

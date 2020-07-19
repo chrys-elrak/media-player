@@ -1,5 +1,6 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {eFileState} from "../models/MediaFile";
+import { MediaFile } from './../models/MediaFile';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { eFileState } from "../models/MediaFile";
 
 declare var ipcRenderer: any;
 
@@ -13,6 +14,8 @@ export class VideoControllerComponent implements OnInit {
   @Input() public currentTime: number;
   @Input() public duration: number = 0;
   @Input() public volume: number = 1;
+  @Input() public playlist: MediaFile[];
+  @Input() public current: MediaFile;
   @Output() private onSeek: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onVolumeChange: EventEmitter<any> = new EventEmitter<any>();
   @Output() private onTogglePlay: EventEmitter<any> = new EventEmitter<any>();
@@ -112,6 +115,6 @@ export class VideoControllerComponent implements OnInit {
   }
 
   togglePlaylistWindow() {
-    ipcRenderer.send('open-playlist', {open: this.playlistOpen});
+    ipcRenderer.send('open-playlist', { open: this.playlistOpen, playlist: this.playlist, current: this.current });
   }
 }
