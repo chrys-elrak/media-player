@@ -42,9 +42,10 @@ const OPEN_FILE_MENU = {
           }, ]
         })
         if (f.canceled) return null;
-        let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false;
+        let merge = ($playlist.size > 0) ? (await mergeItBox(dialog, $win)).response === 0 : false; // Show prompt to user
         broadCastEvent('files-loaded', {
           playlist: setFiles(f.filePaths, merge).map(f => new File(f)),
+          current: 0,
           merge
         })
       } catch (e) {
@@ -145,6 +146,12 @@ const MENU_TEMPLATE = new Menu.buildFromTemplate([{
   }
 ]);
 
+/**
+ * Create an array of files path from $playlist and return an array of these paths without duplications
+ * @param files{string[]}
+ * @param merge{boolean}
+ * @returns {string[]}
+ */
 function setFiles(files, merge = true) {
   if (!merge) {
     $playlist.clear();
@@ -155,6 +162,10 @@ function setFiles(files, merge = true) {
   return [...$playlist];
 }
 
+/**
+ * Create an window playslist, show or hidden depends on show param
+ * @param show{boolean}
+ */
 function initPlaylistWindow(show) {
   $playlistWin = new BrowserWindow({
     parent: $win,
@@ -168,6 +179,10 @@ function initPlaylistWindow(show) {
   });
 }
 
+/**
+ * Create the main window
+ * We can found the core of the app here
+ */
 async function createWindow() {
   $win = new BrowserWindow({
     width: WIDTH,
