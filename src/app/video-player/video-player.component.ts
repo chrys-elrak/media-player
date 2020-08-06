@@ -60,6 +60,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       }
     }
   }
+
   onWheel(ev: WheelEvent) {
     if (this.current) return;
     if (ev.deltaY < 0) { // scroll down
@@ -79,7 +80,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const sub1 = this.ipcService.on('sharedDataChanged').subscribe(_ => {
       this.playlist = this.sharedService.getSharedData('playlist');
-      this.setCurrent(this.sharedService.getSharedData('current'));
+      const current: MediaFile = this.sharedService.getSharedData('current');
+      if (!current) {
+        this.stopPlaying();
+      } else if (!this.current || this.current.ino !== current.ino) {
+        this.setCurrent(current);
+      }
     });
     this.subscriptions.push(sub1);
   }
@@ -102,17 +108,24 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private play() {
+    if (!this.current) {
+      if (this.playlist.length === 0) {
+        return;
+      }
+      this.current = this.playlist[0];
+    }
+    console.log(this.current);
+    this.current.state = eFileState.PLAY;
+    this.video.nativeElement.src = this.current.url;
+    this.video.nativeElement.load();
+    this.video.nativeElement.play();
+    this.ipcService.send('playing-state', this.current);
     this.snackBar.open(`Now playing ${this.current.basename}.`, null, {
       horizontalPosition: 'right',
       verticalPosition: 'top',
       duration: 1000,
       politeness: 'polite',
     });
-    this.current.state = eFileState.PLAY;
-    this.video.nativeElement.src = this.current.url;
-    this.video.nativeElement.load();
-    this.video.nativeElement.play();
-    this.ipcService.send('playing-state', this.current);
   }
 
   stopPlaying() {
@@ -120,6 +133,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.current.state = eFileState.STOP;
     this.video.nativeElement.pause();
     this.video.nativeElement.currentTime = 0;
+    this.current = null;
     this.ipcService.send('playing-state', this.current);
   }
 
@@ -155,7 +169,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   toggleState() {
-    if (!this.current) return;
+    if (!this.current) return this.play();
     if (this.current.state !== eFileState.PLAY) {
       this.current.state = eFileState.PLAY;
       return this.video.nativeElement.play();
