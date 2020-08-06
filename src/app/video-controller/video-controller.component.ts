@@ -47,7 +47,7 @@ export class VideoControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    let sub1 = this.ipcService.on('playlist-opened').subscribe((data: any) => {
+    let sub1 = this.ipcService.on('playlistOpened').subscribe((data: any) => {
       this.playlistOpen = data
     });
 
@@ -115,6 +115,6 @@ export class VideoControllerComponent implements OnInit, OnDestroy {
   }
 
   togglePlaylistWindow() {
-    this.ipcService.send('open-playlist', {open: this.playlistOpen});
+    this.ipcService.send('openPlaylist', {open: this.playlistOpen});
   }
 }

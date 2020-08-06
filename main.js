@@ -49,10 +49,10 @@ app.on("window-all-closed", () => {
 
 /** INTER PROCESS COMMUNICATION **/
 
-ipcMain.on('open-playlist', async (e, arg) => {
+ipcMain.on('openPlaylist', async (e, arg) => {
   if (arg.open) {
     $playlistWin.close();
-    $win.webContents.send('playlist-opened', false);
+    $win.webContents.send('playlistOpened', false);
   } else {
     initPlaylistWindow(true);
     $playlistWin.setMenu(null);
@@ -64,15 +64,15 @@ ipcMain.on('open-playlist', async (e, arg) => {
     }));
     $playlistWin.webContents.openDevTools();
     $playlistWin.show();
-    $win.webContents.send('playlist-opened', true);
+    $win.webContents.send('playlistOpened', true);
     $playlistWin.on('closed', () => {
-      $win.webContents.send('playlist-opened', false);
+      $win.webContents.send('playlistOpened', false);
       $playlistWin = null;
     });
   }
 });
 
-ipcMain.on('get-file-details', async (event, file) => {
+ipcMain.on('getFileDetails', async (event, file) => {
   await dialog.showMessageBox($win, {
     title: `Information`,
     message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024, 2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
@@ -80,6 +80,11 @@ ipcMain.on('get-file-details', async (event, file) => {
   });
 });
 
+ipcMain.on('updateSharedData', (e, arg) => {
+  global.sharedData.playlist = arg.playlist;
+  global.sharedData.current = arg.current;
+  broadCastEvent('sharedDataChanged', {});
+});
 /** FUNCTIONS **/
 
 /**

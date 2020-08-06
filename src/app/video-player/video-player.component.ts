@@ -1,7 +1,7 @@
 import {Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { eFileState, MediaFile } from '../models/MediaFile';
-import { VideoControllerComponent } from "../video-controller/video-controller.component";
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {eFileState, MediaFile} from '../models/MediaFile';
+import {VideoControllerComponent} from "../video-controller/video-controller.component";
 import {IpcService} from "../services/ipc/ipc.service";
 import {Subscription} from "rxjs";
 import {SharedService} from "../services/shared/shared.service";
@@ -11,7 +11,7 @@ import {SharedService} from "../services/shared/shared.service";
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.css']
 })
-export class VideoPlayerComponent implements OnInit,OnDestroy {
+export class VideoPlayerComponent implements OnInit, OnDestroy {
   public playlist: MediaFile[] = [];
   public current: MediaFile;
   public duration: number = 0;
@@ -60,16 +60,15 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
       }
     }
   }
-  onWheel(event: WheelEvent) {
-    if (this.current) {
-      if (event.deltaY > 0) { // scroll down
-        this.volume = this.volume !== 1 ? this.volume += .1 : 1;
+  onWheel(ev: WheelEvent) {
+    if (this.current) return;
+    if (ev.deltaY < 0) { // scroll down
+      this.volume = this.volume !== 1 ? this.volume += .1 : 1;
+      this.setVolume(this.volume);
+    } else if (ev.deltaY > 0) { // scroll up
+      if (this.volume > .1) {
+        this.volume -= .1;
         this.setVolume(this.volume);
-      } else if (event.deltaY < 0) { // scroll up
-        if (this.volume > .1) {
-          this.volume -= .1;
-          this.setVolume(this.volume);
-        }
       }
     }
   }
@@ -78,7 +77,7 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(): void {
-    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(_=> {
+    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(_ => {
       this.playlist = this.sharedService.getSharedData('playlist');
       this.setCurrent(this.sharedService.getSharedData('current'));
     });
@@ -91,26 +90,15 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
 
   private setCurrent(file: MediaFile = null) {
     if (file) {
-      if (this.current) {
-        if (this.current.ino !== file.ino) {
-          this.current.state = eFileState.STOP;
-        }
-        if (this.current.ino === file.ino) {
-          if (this.current.state === eFileState.PLAY) {
-            this.current.state = eFileState.PAUSE;
-            this.video.nativeElement.pause();
-          } else {
-            this.current.state = eFileState.PLAY;
-            this.video.nativeElement.play();
-          }
-          return this.ipcService.send('playing-state', this.current);
-        }
+      if (this.current && this.current.ino === file.ino) {
+        return this.stopPlaying();
       }
       this.current = file;
-    } else {
-      this.current = this.playlist[0];
+      return this.play();
     }
-    this.play();
+    this.stopPlaying();
+    this.current = null;
+
   }
 
   private play() {
@@ -128,6 +116,7 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
   }
 
   stopPlaying() {
+    if (!this.current) return;
     this.current.state = eFileState.STOP;
     this.video.nativeElement.pause();
     this.video.nativeElement.currentTime = 0;
@@ -145,13 +134,14 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
     const last = this.playlist[this.playlist.length > 0 ? this.playlist.length - 1 : 0];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
     if (this.current.ino !== last.ino && idx < this.playlist.length) {
-      this.setCurrent(this.playlist[idx + 1]);
-    } else {
-      if (document.fullscreenElement && document.fullscreenElement.nodeName === 'VIDEO') {
-        this.video.nativeElement.webkitExitFullScreen();
-      }
+      return this.setCurrent(this.playlist[idx + 1]);
+    }
+    if (document.fullscreenElement && document.fullscreenElement.nodeName === 'VIDEO') {
+      this.video.nativeElement.webkitExitFullScreen();
       this.stopPlaying();
     }
+    this.replay();
+
   }
 
   playPrevious() {
@@ -159,22 +149,19 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
     const first = this.playlist[0];
     const idx = this.playlist.findIndex(f => f.ino === this.current.ino);
     if (this.current.ino !== first.ino) {
-      this.setCurrent(this.playlist[idx - 1]);
-    } else {
-      this.replay();
+      return this.setCurrent(this.playlist[idx - 1]);
     }
+    this.replay();
   }
 
   toggleState() {
-    if (this.current) {
-      if (this.current.state !== eFileState.PLAY) {
-        this.current.state = eFileState.PLAY;
-        this.video.nativeElement.play();
-      } else {
-        this.current.state = eFileState.PAUSE;
-        this.video.nativeElement.pause();
-      }
+    if (!this.current) return;
+    if (this.current.state !== eFileState.PLAY) {
+      this.current.state = eFileState.PLAY;
+      return this.video.nativeElement.play();
     }
+    this.current.state = eFileState.PAUSE;
+    this.video.nativeElement.pause();
   }
 
   updateProgressBar() {
@@ -192,6 +179,7 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
 
   private replay() {
     if (this.current) {
+      this.current.state = eFileState.PLAY;
       this.video.nativeElement.currentTime = 0;
       this.video.nativeElement.play();
     }
@@ -204,10 +192,9 @@ export class VideoPlayerComponent implements OnInit,OnDestroy {
 
   toggleFullScreen() {
     if (document.fullscreenElement && document.fullscreenElement.nodeName == 'VIDEO') {
-      this.video.nativeElement.webkitExitFullScreen();
-    } else {
-      this.video.nativeElement.webkitEnterFullScreen();
+      return this.video.nativeElement.webkitExitFullScreen();
     }
+    this.video.nativeElement.webkitEnterFullScreen();
   }
 
 }
