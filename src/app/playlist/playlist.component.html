@@ -6,7 +6,7 @@
           <mat-icon *ngIf="item.state === eStateFile.PLAY">{{ iconStates.pause }}</mat-icon>
           <mat-icon *ngIf="item.state !== eStateFile.PLAY">{{ iconStates.play }}</mat-icon>
         </button>
-        <button *ngIf="item.ino === current.ino" mat-icon-button (click)="stopPlaying()">
+        <button *ngIf="item.ino === current?.ino" mat-icon-button (click)="stopPlaying()">
           <mat-icon>{{ iconStates.stop }}</mat-icon>
         </button>
         <mat-list-item role="listitem">{{item.basename}}</mat-list-item>

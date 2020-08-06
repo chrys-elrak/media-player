@@ -78,14 +78,17 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(_ => {
-      this.playlist = this.sharedService.getSharedData('playlist');
-      const current: MediaFile = this.sharedService.getSharedData('current');
-      if (!current) {
-        this.stopPlaying();
-      } else if (!this.current || this.current.ino !== current.ino) {
-        this.setCurrent(current);
-      }
+    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(arg => {
+      this.zone.run(_ => {
+        this.playlist = this.sharedService.getSharedData('playlist');
+        const current: MediaFile = this.sharedService.getSharedData('current');
+       // Make logic if we will play or stop
+        if (!current) {
+          this.stopPlaying();
+        } else if (!this.current || this.current.ino !== current.ino) {
+          this.setCurrent(current);
+        }
+      });
     });
     this.subscriptions.push(sub1);
   }
@@ -100,11 +103,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
         return this.stopPlaying();
       }
       this.current = file;
+      this.sharedService.updateSharedData('current', this.current);
       return this.play();
     }
     this.stopPlaying();
     this.current = null;
-
   }
 
   private play() {
@@ -114,7 +117,6 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       }
       this.current = this.playlist[0];
     }
-    console.log(this.current);
     this.current.state = eFileState.PLAY;
     this.video.nativeElement.src = this.current.url;
     this.video.nativeElement.load();
@@ -134,7 +136,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.video.nativeElement.pause();
     this.video.nativeElement.currentTime = 0;
     this.current = null;
-    this.ipcService.send('playing-state', this.current);
+    this.sharedService.updateSharedData('current', null);
   }
 
   loadMetaData() {

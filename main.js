@@ -80,10 +80,14 @@ ipcMain.on('getFileDetails', async (event, file) => {
   });
 });
 
-ipcMain.on('updateSharedData', (e, arg) => {
+ipcMain.on('removeFileFromPlaylist', (e, arg) => {
   global.sharedData.playlist = arg.playlist;
   global.sharedData.current = arg.current;
   broadCastEvent('sharedDataChanged', {});
+});
+
+ipcMain.on('updateSharedData', (e, arg) => {
+  broadCastEvent('sharedDataChanged', global.sharedData);
 });
 /** FUNCTIONS **/
 

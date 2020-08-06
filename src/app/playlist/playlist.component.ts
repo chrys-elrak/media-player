@@ -23,18 +23,18 @@ export class PlaylistComponent implements OnInit, OnDestroy {
   };
 
   constructor(private ipcService: IpcService, private sharedService: SharedService, private zone: NgZone, private snackBar: MatSnackBar) {
+    this.playlist = this.sharedService.getSharedData('playlist');
+    this.current = this.sharedService.getSharedData('current');
   }
 
   ngOnInit(): void {
-    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(_ => {
+    const sub1 = this.ipcService.on('sharedDataChanged').subscribe(arg => {
       this.zone.run(_ => {
         this.playlist = this.sharedService.getSharedData('playlist');
-        this.setCurrent(this.sharedService.getSharedData('current'));
+        this.current = (this.sharedService.getSharedData('current'));
       });
     });
     this.subscriptions.push(sub1);
-    this.playlist = this.sharedService.getSharedData('playlist');
-    this.current = this.sharedService.getSharedData('current');
   }
 
   ngOnDestroy() {
@@ -46,22 +46,21 @@ export class PlaylistComponent implements OnInit, OnDestroy {
       this.current = item;
       return;
     }
-    this.current = this.playlist[0];
   }
 
   removeFromList(item: MediaFile) {
     this.playlist = this.playlist.filter(f => f.ino !== item.ino);
 
-    // play next when removing current
-    if (this.current.ino === item.ino) {
+    if (this.current?.ino === item.ino) {
       const idx = this.playlist.findIndex(f => f.ino === item.ino);
+      // play next when removing current
       if (idx < this.playlist.length - 1) {
         this.current = this.playlist[idx + 1];
       } else {
         this.current = null;
       }
     }
-    this.ipcService.send('updateSharedData', {playlist: this.playlist, current: this.current});
+    this.ipcService.send('removeFileFromPlaylist', {playlist: this.playlist, current: this.current});
     this.snackBar.open(`${item.basename} removed from playlist.`, null, {
       duration: 2000,
     });
