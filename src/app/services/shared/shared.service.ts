@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {IpcService} from "../ipc/ipc.service";
 
 declare var remote: any;
 
@@ -11,13 +12,14 @@ export class SharedService {
 
   public updateSharedData(key: string, value: any) {
     this.remote.getGlobal('sharedData')[key] = value;
+    this.ipcService.send('updateSharedData');
   }
 
   public getSharedData(key: string) {
     return this.remote.getGlobal('sharedData')[key];
   }
 
-  constructor() {
+  constructor(private ipcService: IpcService) {
     this.remote = remote;
   }
 }
