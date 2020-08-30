@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {IpcService} from "../ipc/ipc.service";
+import {IpcService} from '../ipc/ipc.service';
 
 declare var remote: any;
 

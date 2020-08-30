@@ -59,7 +59,7 @@ export class VideoControllerComponent implements OnInit, OnDestroy {
   }
 
   /*
-  * TO FIX: Handle video havings duration more than 60 minutesS
+  * TO FIX: Handle video having duration more than 60 minutesS
   * */
   updateDuration() {
     let curmins: any = Math.floor(this.currentTime / 60);
