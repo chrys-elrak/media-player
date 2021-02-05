@@ -11,25 +11,34 @@ const url = require("url");
 const moment = require('moment');
 const File = require('../core/models/file');
 const walk = require('../core/helpers/walkDirectories');
-const {
-  mergeItBox
-} = require('../core/helpers/box');
 const eFileState = require('../core/enums/state');
 const {
   broadCastEvent
 } = require('../core/helpers/ipc');
 require('dotenv').config();
+const { CapacitorSplashScreen, configCapacitor } = require('@capacitor/electron');
 
 /** CONSTANTS **/
 const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'),
-  TITLE = 'CMP (Chrys Media Player)';
-const EXT = ['mkv', 'avi', 'mp4', 'mp3', 'wav'],
+  TITLE = 'CMP (Chrys Media Player)',
+  EXT = ['mkv', 'avi', 'mp4', 'mp3', 'wav'],
   NAME = 'Files',
   HEIGHT = 300,
   WIDTH = 600;
+const BROWSER_WINDOW_CONFIG = {
+  width: WIDTH,
+  height: HEIGHT,
+  title: TITLE,
+  minWidth: 620,
+  minHeight: 120,
+  webPreferences: {
+    nodeIntegration: true,
+    preload: path.join(__dirname, 'node_modules', '@capacitor', 'electron', 'dist', 'electron-bridge.js')
+  }
+};
 
 /** GLOBAL VARIABLES**/
-let $win, $playlistWin;
+let mainWindow, playlistWindow;
 
 /** SHARED DATA **/
 global.sharedData = {
@@ -51,29 +60,29 @@ app.on("window-all-closed", () => {
 
 ipcMain.on('openPlaylist', async (e, arg) => {
   if (arg.open) {
-    $playlistWin.close();
-    $win.webContents.send('playlistOpened', false);
+    playlistWindow.close();
+    mainWindow.webContents.send('playlistOpened', false);
   } else {
     initPlaylistWindow(true);
-    $playlistWin.setMenu(null);
-    await $playlistWin.loadURL(url.format({
+    playlistWindow.setMenu(null);
+    await playlistWindow.loadURL(url.format({
       pathname: PATH_NAME,
       protocol: 'file:',
       slashes: true,
       hash: '/playlist'
     }));
-    $playlistWin.webContents.openDevTools();
-    $playlistWin.show();
-    $win.webContents.send('playlistOpened', true);
-    $playlistWin.on('closed', () => {
-      $win.webContents.send('playlistOpened', false);
-      $playlistWin = null;
+    playlistWindow.webContents.openDevTools();
+    playlistWindow.show();
+    mainWindow.webContents.send('playlistOpened', true);
+    playlistWindow.on('closed', () => {
+      mainWindow.webContents.send('playlistOpened', false);
+      playlistWindow = null;
     });
   }
 });
 
 ipcMain.on('getFileDetails', async (event, file) => {
-  await dialog.showMessageBox($win, {
+  await dialog.showMessageBox(mainWindow, {
     title: `Information`,
     message: `Title: ${file.basename}\nType: ${file.filetype}\nSize: ${(file.size / Math.pow(1024, 2)).toFixed(2)} MB\nCreated: ${moment(file.birthtime).format('MMMM Do YYYY, h:mm:ss a')}`,
     type: 'info',
@@ -95,31 +104,19 @@ ipcMain.on('updateSharedData', (e, arg) => {
  * Create the main window
  * We can found the core of the app here
  */
-async function createWindow() {
-  $win = new BrowserWindow({
-    width: WIDTH,
-    height: HEIGHT,
-    title: TITLE,
-    minWidth: 620,
-    minHeight: 120,
-    webPreferences: {
-      nodeIntegration: true
-    }
+function createWindow() {
+  mainWindow = new BrowserWindow(BROWSER_WINDOW_CONFIG)
+  configCapacitor(mainWindow);
+
+  mainWindow.loadURL(`file://${__dirname}/app/index.html`);
+  mainWindow.webContents.on('dom-ready', () => {
+    mainWindow.show();
   });
+  // initPlaylistWindow(false);
 
-  await $win.loadURL(
-    url.format({
-      pathname: PATH_NAME,
-      protocol: "file:",
-      slashes: true
-    })
-  );
+  mainWindow.setMenu(buildMenu());
 
-  initPlaylistWindow(false);
-
-  $win.setMenu(buildMenu());
-
-  $win.on('minimize', () => {
+  mainWindow.on('minimize', () => {
     if (!!current) {
       const notification = new Notification({
         title: 'Media player is running',
@@ -130,10 +127,10 @@ async function createWindow() {
     }
   });
 
-  process.env.ENV === 'dev' ? $win.webContents.openDevTools() : null;
+  process.env.ENV === 'dev' ? mainWindow.webContents.openDevTools() : null;
 
-  $win.on("closed", (e) => {
-    $win = null;
+  mainWindow.on("closed", (e) => {
+    mainWindow = null;
   });
 }
 
@@ -142,16 +139,9 @@ async function createWindow() {
  * @param show{boolean}
  */
 function initPlaylistWindow(show) {
-  $playlistWin = new BrowserWindow({
-    parent: $win,
-    width: WIDTH,
-    height: HEIGHT,
-    title: `${TITLE} - Playlist`,
-    show,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  });
+  playlistWindow = new BrowserWindow(BROWSER_WINDOW_CONFIG);
+  playlistWindow.setParentWindow(mainWindow);
+  playlistWindow.setTitle(`${TITLE} - Playlist`);
 }
 
 /**
@@ -189,7 +179,7 @@ function buildMenu() {
             message: "Do you really want to quit?",
             checkboxLabel: 'Do not show it later',
           }
-          dialog.showMessageBox($win, options).then(r => {
+          dialog.showMessageBox(mainWindow, options).then(r => {
             if (r.response === 0) {
               app.quit();
             }
@@ -206,29 +196,25 @@ function buildMenu() {
 * This open a dialog to browse file
 * */
 async function openFile(properties = [], dir = false) {
-  try {
-    let files = new Set();
-    const f = await dialog.showOpenDialog({
-      properties,
-      filters: [{
-        name: NAME,
-        extensions: EXT
-      },]
-    });
-    if (f.canceled) return null;
-    if (dir) {
-      // Getting files from directory
-      for await (const ff of walk(f.filePaths[0], EXT)) {
-        files.add(new File(ff));
-      }
-    } else {
-      f.filePaths.forEach(ff => files.add(new File(ff)));
+  let files = new Set();
+  const f = await dialog.showOpenDialog({
+    properties,
+    filters: [{
+      name: NAME,
+      extensions: EXT
+    },]
+  });
+  if (f.canceled) return null;
+  if (dir) {
+    // Getting files from directory
+    for await (const ff of walk(f.filePaths[0], EXT)) {
+      files.add(new File(ff));
     }
-    global.sharedData.playlist = [...files];
-    global.sharedData.current = [...files][0];
-    broadCastEvent('sharedDataChanged', {});
-  } catch (e) {
-    throw e;
+  } else {
+    f.filePaths.forEach(ff => files.add(new File(ff)));
   }
+  global.sharedData.playlist = [...files];
+  global.sharedData.current = [...files][0];
+  broadCastEvent('sharedDataChanged', {});
 }
 
