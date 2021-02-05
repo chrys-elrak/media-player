@@ -38,7 +38,8 @@
     "path": "^0.12.7",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.10.2",
+    "@ionic/angular": "latest"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.901.9",
@@ -65,6 +66,7 @@
     "tslint": "~6.1.0",
     "typescript": "~3.8.3",
     "wait-on": "^5.0.1",
-    "@capacitor/cli": "latest"
+    "@capacitor/cli": "latest",
+    "@ionic/angular-toolkit": "latest"
   }
 }
