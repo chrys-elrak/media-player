@@ -9,15 +9,15 @@ const {
 const path = require("path");
 const url = require("url");
 const moment = require('moment');
-const File = require('./core/models/file');
-const walk = require('./core/helpers/walkDirectories');
+const File = require('../core/models/file');
+const walk = require('../core/helpers/walkDirectories');
 const {
   mergeItBox
-} = require('./core/helpers/box');
-const eFileState = require('./core/enums/state');
+} = require('../core/helpers/box');
+const eFileState = require('../core/enums/state');
 const {
   broadCastEvent
-} = require('./core/helpers/ipc');
+} = require('../core/helpers/ipc');
 require('dotenv').config();
 
 /** CONSTANTS **/

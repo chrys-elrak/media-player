@@ -1,4 +1,6 @@
 import {Component} from '@angular/core';
+import { Plugins } from '@capacitor/core';
+const {Modals, Toast, LocalNotifications} = Plugins;
 
 @Component({
   selector: 'app-root',

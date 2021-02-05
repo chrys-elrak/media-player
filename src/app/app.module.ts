@@ -18,6 +18,7 @@ import { PlaylistComponent } from './playlist/playlist.component';
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatSliderModule} from "@angular/material/slider";
 import { AppRoutingModule } from './app-routing.module';
+import { IonicModule } from '@ionic/angular';
 
 
 @NgModule({
@@ -42,6 +43,7 @@ import { AppRoutingModule } from './app-routing.module';
     MatProgressBarModule,
     MatSliderModule,
     AppRoutingModule,
+    IonicModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

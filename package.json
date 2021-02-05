@@ -28,10 +28,13 @@
     "@angular/platform-browser": "~9.1.11",
     "@angular/platform-browser-dynamic": "~9.1.11",
     "@angular/router": "~9.1.11",
+    "@capacitor/angular": "^1.0.3",
+    "@capacitor/core": "latest",
     "@types/electron": "^1.6.10",
     "dotenv": "^8.2.0",
     "mat-video": "^2.8.1",
     "moment": "^2.27.0",
+    "ngx-electron": "^2.2.0",
     "path": "^0.12.7",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
@@ -61,6 +64,7 @@
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
     "typescript": "~3.8.3",
-    "wait-on": "^5.0.1"
+    "wait-on": "^5.0.1",
+    "@capacitor/cli": "latest"
   }
 }
