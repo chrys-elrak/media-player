@@ -5,7 +5,7 @@
 .video-controller {
   position: absolute;
   bottom: 0px;
-  background-color: rgba(255, 255, 255, .8);
+  background-color: rgba(255, 251, 251, 0.993);
   width: 100%;
   border-radius: 0;
 }

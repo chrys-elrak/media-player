@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist",
+            "outputPath": "app",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -23,7 +23,7 @@
               "src/favicon.ico",
               {
                 "glob": "**/*.svg",
-                "input": "node_modules/ionicons/dist/ionicons/svg",
+                "input": "node_modules/ionicons/app/ionicons/svg",
                 "output": "./svg"
               }
             ],
@@ -125,7 +125,7 @@
               "src/favicon.ico",
               {
                 "glob": "**/*.svg",
-                "input": "node_modules/ionicons/dist/ionicons/svg",
+                "input": "node_modules/ionicons/app/ionicons/svg",
                 "output": "./svg"
               }
             ],

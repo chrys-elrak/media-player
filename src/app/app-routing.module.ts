@@ -4,8 +4,8 @@ import {VideoPlayerComponent} from "./video-player/video-player.component";
 import {PlaylistComponent} from "./playlist/playlist.component";
 
 const routes: Routes = [
-  {path: '', component: VideoPlayerComponent},
-  {path: 'playlist', component: PlaylistComponent}
+  {path: '', component: VideoPlayerComponent, pathMatch: 'full'},
+  {path: 'playlist', component: PlaylistComponent, pathMatch: 'full'}
 ];
 
 @NgModule({

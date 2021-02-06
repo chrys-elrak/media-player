@@ -19,6 +19,7 @@ import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatSliderModule} from "@angular/material/slider";
 import { AppRoutingModule } from './app-routing.module';
 import { IonicModule } from '@ionic/angular';
+import {NgxElectronModule} from 'ngx-electron';
 
 
 @NgModule({
@@ -43,6 +44,7 @@ import { IonicModule } from '@ionic/angular';
     MatProgressBarModule,
     MatSliderModule,
     AppRoutingModule,
+    NgxElectronModule,
     IonicModule.forRoot(),
   ],
   providers: [],

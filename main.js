@@ -9,17 +9,16 @@ const {
 const path = require("path");
 const url = require("url");
 const moment = require('moment');
-const File = require('../core/models/file');
-const walk = require('../core/helpers/walkDirectories');
-const eFileState = require('../core/enums/state');
+require('dotenv').config();
+const { configCapacitor } = require('@capacitor/electron');
+const File = require('./core/models/file');
+const walk = require('./core/helpers/walkDirectories');
 const {
   broadCastEvent
-} = require('../core/helpers/ipc');
-require('dotenv').config();
-const { CapacitorSplashScreen, configCapacitor } = require('@capacitor/electron');
+} = require('./core/helpers/ipc');
 
 /** CONSTANTS **/
-const PATH_NAME = path.join(__dirname, '/dist/media-player/index.html'),
+const PATH_NAME = path.join(__dirname, '/app/media-player/index.html'),
   TITLE = 'CMP (Chrys Media Player)',
   EXT = ['mkv', 'avi', 'mp4', 'mp3', 'wav'],
   NAME = 'Files',
@@ -44,7 +43,8 @@ let mainWindow, playlistWindow;
 global.sharedData = {
   playlist: [],
   current: null
-}
+};
+
 
 /** MAIN PROCESS **/
 
@@ -65,14 +65,8 @@ ipcMain.on('openPlaylist', async (e, arg) => {
   } else {
     initPlaylistWindow(true);
     playlistWindow.setMenu(null);
-    await playlistWindow.loadURL(url.format({
-      pathname: PATH_NAME,
-      protocol: 'file:',
-      slashes: true,
-      hash: '/playlist'
-    }));
+    playlistWindow.loadURL(`file://${__dirname}/app/index.html#/playlist`);
     playlistWindow.webContents.openDevTools();
-    playlistWindow.show();
     mainWindow.webContents.send('playlistOpened', true);
     playlistWindow.on('closed', () => {
       mainWindow.webContents.send('playlistOpened', false);
@@ -105,7 +99,7 @@ ipcMain.on('updateSharedData', (e, arg) => {
  * We can found the core of the app here
  */
 function createWindow() {
-  mainWindow = new BrowserWindow(BROWSER_WINDOW_CONFIG)
+  mainWindow = new BrowserWindow(BROWSER_WINDOW_CONFIG);
   configCapacitor(mainWindow);
 
   mainWindow.loadURL(`file://${__dirname}/app/index.html`);
@@ -117,11 +111,11 @@ function createWindow() {
   mainWindow.setMenu(buildMenu());
 
   mainWindow.on('minimize', () => {
-    if (!!current) {
+    if (global.sharedData.current) {
       const notification = new Notification({
         title: 'Media player is running',
         subtitle: 'You can change music/video from here',
-        body: `${current.basename}`,
+        body: `${global.sharedData.current.basename}`,
       });
       notification.show();
     }
@@ -129,7 +123,7 @@ function createWindow() {
 
   process.env.ENV === 'dev' ? mainWindow.webContents.openDevTools() : null;
 
-  mainWindow.on("closed", (e) => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 }
@@ -142,10 +136,14 @@ function initPlaylistWindow(show) {
   playlistWindow = new BrowserWindow(BROWSER_WINDOW_CONFIG);
   playlistWindow.setParentWindow(mainWindow);
   playlistWindow.setTitle(`${TITLE} - Playlist`);
+  if (show) {
+    playlistWindow.show();
+  }
 }
 
 /**
  * Build menu bar, with those specific action
+ * @return Menu
  */
 function buildMenu() {
   const OPEN_FILE_MENU = {
@@ -178,7 +176,7 @@ function buildMenu() {
             buttons: ["Yes", "Cancel"],
             message: "Do you really want to quit?",
             checkboxLabel: 'Do not show it later',
-          }
+          };
           dialog.showMessageBox(mainWindow, options).then(r => {
             if (r.response === 0) {
               app.quit();
