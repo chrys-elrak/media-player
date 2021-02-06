@@ -5,6 +5,7 @@ import {VideoControllerComponent} from "../video-controller/video-controller.com
 import {IpcService} from "../services/ipc/ipc.service";
 import {Subscription} from "rxjs";
 import {SharedService} from "../services/shared/shared.service";
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-video-player',
@@ -18,8 +19,10 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   public currentTime: number = 0;
   public volume: number = 1;
   private subscriptions: Subscription[] = [];
+  menuTopLeftPosition =  {x: '0', y: '0'};
   @ViewChild('video') public video: ElementRef;
   @ViewChild('videoControllerComponent') public videoController: VideoControllerComponent;
+  @ViewChild(MatMenuTrigger, {static: true}) matMenuTrigger: MatMenuTrigger; 
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(ev: KeyboardEvent) {
@@ -60,7 +63,6 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       }
     }
   }
-
   onWheel(ev: WheelEvent) {
     if (this.current) return;
     if (ev.deltaY < 0) { // scroll down
@@ -199,6 +201,14 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       this.video.nativeElement.currentTime = 0;
       this.video.nativeElement.play();
     }
+  }
+
+  rightClick(event) {
+    // event.preventDefault(); 
+    console.log('R CLICK')
+    this.menuTopLeftPosition.x = event.clientX + 'px'; 
+    this.menuTopLeftPosition.y = event.clientY + 'px'; 
+    this.matMenuTrigger.openMenu(); 
   }
 
   onResize(e) {

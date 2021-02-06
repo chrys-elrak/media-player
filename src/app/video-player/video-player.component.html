@@ -1,11 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-        Media Player
+        {{ current ? current.basename : 'Media Player'}}
     </ion-title>
   </ion-toolbar>
 </ion-header>
-<div (window:resize)="onResize($event.target)" class="video-container">
+<div (window:resize)="onResize($event.target)" class="video-container" (contextmenu)="rightClick($event)">
   <div class="video-container" (wheel)="onWheel($event)">
     <video #video width="100%" height="100%" (dblclick)="toggleFullScreen()" (ended)="playNext()" (loadeddata)="loadMetaData()"
            (timeupdate)="updateProgressBar()"></video>
@@ -19,3 +19,13 @@
                         (onVolumeChange)="setVolume($event)"
                         ></app-video-controller>
 </div>
+<div style="visibility: hidden; position: fixed;" 
+[style.left]="menuTopLeftPosition.x" 
+[style.top]="menuTopLeftPosition.y" 
+[matMenuTriggerFor]="rightMenu"></div> 
+<mat-menu #rightMenu="matMenu"> 
+  <ng-template matMenuContent let-item="item"> 
+    <button mat-menu-item>Clicked!</button> 
+    <button mat-menu-item>Fixed value</button> 
+  </ng-template> 
+</mat-menu> 
